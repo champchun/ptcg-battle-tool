@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PTCG Pro - Smart Coin</title>
+    <style>
+        :root { --bg: #f0f4f8; --opp-bg: #ff6b6b; --me-bg: #48dbfb; --accent: #feca57; }
+        body {
+            font-family: sans-serif; background-color: var(--bg); color: white;
+            margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+        }
+        .player-section { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .opponent { transform: rotate(180deg); background-color: var(--opp-bg); border-bottom: 4px solid white; }
+        .me { background-color: var(--me-bg); color: white; }
+
+        .main-battle { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .hp-box { display: flex; align-items: center; gap: 15px; margin: 5px 0; }
+        .hp-display { font-size: 2.5rem; font-weight: bold; min-width: 70px; text-align: center; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
+        .me .hp-display { color: white; }
+        
+        /* 標籤改為可點擊手動切換 */
+        .turn-label {
+            background: rgba(0, 0, 0, 0.4); padding: 4px 12px; border-radius: 12px;
+            font-size: 0.8rem; margin-top: 5px; color: #fff; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 10px; margin: 5px; }
+        .me .bench-container { background: rgba(0,0,0,0.1); }
+        .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.25); padding: 5px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.4); }
+        .me .bench-slot { background: rgba(255,255,255,0.25); }
+        .switch-label { font-size: 0.65rem; background: rgba(0,0,0,0.2); padding: 2px 5px; border-radius: 3px; cursor: pointer; margin-bottom: 2px; }
+        .me .switch-label { color: white; }
+        .bench-hp { font-size: 1.1rem; font-weight: bold; margin: 2px 0; }
+        
+        button { width: 35px; height: 35px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; touch-action: manipulation; box-shadow: 0 2px 4px rgba(0,0,0,0.2); font-weight: bold; }
+        .me button { color: #333; border-color: white; background: white; }
+        .bench-btn { width: 22px; height: 22px; font-size: 0.8rem; }
+        
+        .controls { position: fixed; right: 5px; top: 50%; transform: translateY(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .side-btn { background: #444; border: 1px solid #777; padding: 8px; border-radius: 4px; font-size: 0.7rem; color: white; width: 50px; text-align: center; cursor: pointer; }
+        .reset { background: #e74c3c; }
+        
+        .coin-btn {
+            background: #f1c40f; color: #000; font-weight: bold; border: 4px solid #b8860b; transition: 0.2s;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80px; height: 80px; border-radius: 50%; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .coin-animation { animation: flip 0.3s infinite; }
+        @keyframes flip { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
+
+        /* 手機優化：防止誤選文字、優化觸控反應 */
+        button, .turn-label, .switch-label, .side-btn, .status-btn, .hp-display {
+            user-select: none; -webkit-user-select: none; touch-action: manipulation;
+        }
+
+        /* 異常狀態按鈕 */
+        .status-row { display: flex; gap: 8px; margin: 2px 0; }
+        .status-btn { width: 42px; height: 42px; border-radius: 50%; border: 2px solid white; cursor: pointer; opacity: 0.2; transition: 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status-btn.active { opacity: 1; transform: scale(1.15); box-shadow: 0 0 10px rgba(255,255,255,0.8); }
+        .status-btn svg { width: 27px; height: 27px; fill: white; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.3)); }
+        .st-psn { background: #9b59b6; } /* 毒 */
+        .st-brn { background: #e74c3c; } /* 燒 */
+        .st-par { background: #f1c40f; } /* 麻 */
+        .st-slp { background: #3498db; } /* 睡 */
+        .st-cnf { background: #e84393; } /* 亂 */
+    </style>
+</head>
+<body>
+
+    <div class="player-section opponent">
+        <div class="main-battle">
+            <div class="hp-box">
+                <button onclick="changeHP('hp-opp', -10)">-</button>
+                <div class="hp-display" id="hp-opp">0</div>
+                <button onclick="changeHP('hp-opp', 10)">+</button>
+            </div>
+            <div class="status-row">
+                <!-- 毒: 骷髏 -->
+                <div class="status-btn st-psn" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>
+                </div>
+                <!-- 燒: 火焰 -->
+                <div class="status-btn st-brn" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
+                </div>
+                <!-- 麻: 閃電 -->
+                <div class="status-btn st-par" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                </div>
+                <!-- 睡: 月亮 -->
+                <div class="status-btn st-slp" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+                </div>
+                <!-- 亂: 問號/螺旋 -->
+                <div class="status-btn st-cnf" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                </div>
+            </div>
+            <div id="turn-opp" class="turn-label" onclick="manualToggleTurn()">Waiting</div>
+        </div>
+        <div class="bench-container" id="bench-opp"></div>
+    </div>
+
+    <div id="coin-btn" class="side-btn coin-btn" onclick="flipCoin()">Flip</div>
+    <div class="controls">
+        <div id="coin-counter" class="side-btn" style="background: #feca57; color: #333; font-weight: bold;" onclick="resetCoinCount()">O: 0</div>
+        <div class="side-btn reset" onclick="if(confirm('Reset?')) location.reload()">RESET</div>
+    </div>
+
+    <div class="player-section me">
+        <div class="main-battle">
+            <div id="turn-me" class="turn-label" onclick="manualToggleTurn()">Waiting</div>
+            <div class="hp-box">
+                <button onclick="changeHP('hp-me', -10)">-</button>
+                <div class="hp-display" id="hp-me">0</div>
+                <button onclick="changeHP('hp-me', 10)">+</button>
+            </div>
+            <div class="status-row">
+                <!-- 毒 -->
+                <div class="status-btn st-psn" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>
+                </div>
+                <!-- 燒 -->
+                <div class="status-btn st-brn" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
+                </div>
+                <!-- 麻 -->
+                <div class="status-btn st-par" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                </div>
+                <!-- 睡 -->
+                <div class="status-btn st-slp" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+                </div>
+                <!-- 亂 -->
+                <div class="status-btn st-cnf" onclick="this.classList.toggle('active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="bench-container" id="bench-me"></div>
+    </div>
+
+    <script>
+        let isFirstFlip = true; // 紀錄是否為第一次投幣
+        let isFlipping = false;
+        let headsCount = 0;
+
+        // 初始化備戰區 (改用 innerHTML 取代 document.write 以提升手機相容性)
+        function initBench(containerId, prefix, hpId) {
+            const container = document.getElementById(containerId);
+            let html = '';
+            for(let i=1; i<=5; i++) {
+                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${prefix}-b${i}')">Switch ${i}</div><div class="bench-hp" id="${prefix}-b${i}">0</div><div style="display:flex; gap:3px;"><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', -10)">-</button><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', 10)">+</button></div></div>`;
+            }
+            container.innerHTML = html;
+        }
+        initBench('bench-opp', 'opp', 'hp-opp');
+        initBench('bench-me', 'me', 'hp-me');
+
+        function changeHP(id, amount) {
+            const el = document.getElementById(id);
+            // 使用 textContent 並增加容錯，避免手機版解析錯誤
+            let current = parseInt(el.textContent) || 0;
+            el.textContent = Math.max(0, current + amount);
+        }
+
+        function switchHP(activeId, benchId) {
+            const activeEl = document.getElementById(activeId);
+            const benchEl = document.getElementById(benchId);
+            [activeEl.textContent, benchEl.textContent] = [benchEl.textContent, activeEl.textContent];
+        }
+
+        // 手動切換先後攻（隨時點擊標籤都可以改）
+        function manualToggleTurn() {
+            const meLabel = document.getElementById('turn-me');
+            const oppLabel = document.getElementById('turn-opp');
+            if (meLabel.innerText.includes("First")) {
+                setTurnStatus("Second");
+            } else {
+                setTurnStatus("First");
+            }
+        }
+
+        function setTurnStatus(meStatus) {
+            const meLabel = document.getElementById('turn-me');
+            const oppLabel = document.getElementById('turn-opp');
+            if (meStatus === "First") {
+                meLabel.innerText = "First"; meLabel.style.background = "#d35400";
+                oppLabel.innerText = "Second"; oppLabel.style.background = "#34495e";
+            } else {
+                meLabel.innerText = "Second"; meLabel.style.background = "#34495e";
+                oppLabel.innerText = "First"; oppLabel.style.background = "#d35400";
+            }
+        }
+
+        function flipCoin() {
+            if (isFlipping) return;
+            isFlipping = true;
+            
+            const btn = document.getElementById('coin-btn');
+            btn.classList.add('coin-animation');
+            btn.innerText = "??";
+
+            setTimeout(() => {
+                const result = Math.random() > 0.5 ? "O" : "X";
+                btn.classList.remove('coin-animation');
+                btn.innerText = result;
+                btn.style.background = result === "O" ? "#f1c40f" : "#ecf0f1";
+                
+                if (result === "O") {
+                    headsCount++;
+                    document.getElementById('coin-counter').innerText = "O: " + headsCount;
+                }
+                
+                // 第一次投幣：自動連動先後攻
+                if (isFirstFlip) {
+                    setTurnStatus(result === "O" ? "First" : "Second");
+                    isFirstFlip = false; // 關閉連動模式
+                    btn.style.boxShadow = "0 0 10px white"; // 提醒連動已結束
+                }
+                
+                isFlipping = false;
+            }, 600);
+        }
+
+        function resetCoinCount() {
+            headsCount = 0;
+            document.getElementById('coin-counter').textContent = "O: 0";
+        }
+    </script>
+</body>
+</html>
