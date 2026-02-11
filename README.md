@@ -21,6 +21,10 @@ This is a web-based assistant tool for Pokémon TCG (Trading Card Game) designed
 1. Download the `index.html` file from this project.
 2. Open the file directly using a web browser (Chrome, Safari, etc.) on your computer or mobile phone.
 
+### Method 2: Online Version
+Or you can use this website:
+https://champchun.github.io/ptcg-battle-tool/
+
 ## 🛠️ Instructions
 
 *   **Adjust HP**: Tap the `+` or `-` buttons.
