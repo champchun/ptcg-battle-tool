@@ -31,17 +31,17 @@
 
         .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 10px; margin: 5px; }
         .me .bench-container { background: rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .bench-slot { display: flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); padding: 5px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+        .bench-slot { display: flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); padding: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
         .me .bench-slot { background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); }
-        .switch-label { width: 94%; text-align: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 0; border-radius: 4px; cursor: pointer; margin-bottom: 4px; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.1s, box-shadow 0.1s; }
+        .switch-label { width: 94%; text-align: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 8px 0; border-radius: 4px; cursor: pointer; margin-bottom: 6px; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.1s, box-shadow 0.1s; }
         .switch-label:active { transform: translateY(1px) scale(0.98); box-shadow: none; }
         .me .switch-label { color: white; }
-        .bench-hp { font-size: 1.1rem; font-weight: bold; margin: 2px 0; }
+        .bench-hp { font-size: 1.2rem; font-weight: bold; margin: 4px 0; }
         
         button { width: 35px; height: 35px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; touch-action: manipulation; box-shadow: 0 2px 4px rgba(0,0,0,0.2); font-weight: bold; }
         .me button { color: #333; border-color: white; background: white; }
         .bench-controls { display: flex; width: 94%; gap: 4px; margin-top: 2px; }
-        .bench-btn { width: auto; flex: 1; height: 22px; border-radius: 6px; font-size: 0.8rem; padding: 0; }
+        .bench-btn { width: auto; flex: 1; height: 32px; border-radius: 6px; font-size: 1rem; padding: 0; }
         
         .controls { position: fixed; right: 5px; top: 50%; transform: translateY(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; align-items: center; }
         .side-btn { background: #444; border: 1px solid #777; padding: 8px; border-radius: 4px; font-size: 0.7rem; color: white; width: 50px; text-align: center; cursor: pointer; }
@@ -89,7 +89,7 @@
         }
 
         /* 手機優化：防止誤選文字、優化觸控反應 */
-        button, .turn-label, .switch-label, .side-btn, .status-btn, .hp-display {
+        button, .turn-label, .switch-label, .side-btn, .status-btn, .hp-display, .gx-marker {
             user-select: none; -webkit-user-select: none; touch-action: manipulation;
         }
 
@@ -113,12 +113,23 @@
         /* 氣絕狀態 (Fainted) */
         .bench-slot.fainted { opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
         .main-battle.fainted > *:not(.turn-label) { opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
+
+        /* GX 標記按鈕 */
+        .gx-marker {
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            background: linear-gradient(135deg, #0984e3, #74b9ff);
+            color: white; font-weight: 900; font-size: 0.9rem;
+            padding: 4px 8px; border-radius: 4px; border: 2px solid white;
+            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.3s; z-index: 10;
+        }
+        .gx-marker.used { background: #444; color: #888; border-color: #666; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
     <div class="player-section opponent">
         <div class="main-battle">
+            <div class="gx-marker" onclick="this.classList.toggle('used')">GX</div>
             <div class="hp-box">
                 <button onclick="changeHP('hp-opp', -10)">-</button>
                 <div class="hp-display" id="hp-opp">0</div>
@@ -159,6 +170,7 @@
 
     <div class="player-section me">
         <div class="main-battle">
+            <div class="gx-marker" onclick="this.classList.toggle('used')">GX</div>
             <div id="turn-me" class="turn-label" onclick="manualToggleTurn()">Waiting</div>
             <div class="hp-box">
                 <button onclick="changeHP('hp-me', -10)">-</button>
