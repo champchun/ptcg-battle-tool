@@ -24,9 +24,10 @@
         
         /* 標籤改為可點擊手動切換 */
         .turn-label {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
             background: rgba(0, 0, 0, 0.4); padding: 4px 12px; border-radius: 12px;
-            font-size: 0.8rem; margin-top: 5px; color: #fff; cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.8rem; color: #fff; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.2); z-index: 5;
         }
 
         .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 10px; margin: 5px; }
@@ -274,11 +275,11 @@
             const meLabel = document.getElementById('turn-me');
             const oppLabel = document.getElementById('turn-opp');
             if (meStatus === "First") {
-                meLabel.innerText = "First"; meLabel.style.background = "#d35400";
-                oppLabel.innerText = "Second"; oppLabel.style.background = "#34495e";
+                meLabel.innerText = "First"; meLabel.style.background = "#2980b9"; // Blue
+                oppLabel.innerText = "Second"; oppLabel.style.background = "#c0392b"; // Red
             } else {
-                meLabel.innerText = "Second"; meLabel.style.background = "#34495e";
-                oppLabel.innerText = "First"; oppLabel.style.background = "#d35400";
+                meLabel.innerText = "Second"; meLabel.style.background = "#c0392b"; // Red
+                oppLabel.innerText = "First"; oppLabel.style.background = "#2980b9"; // Blue
             }
         }
 
