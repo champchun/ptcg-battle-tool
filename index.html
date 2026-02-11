@@ -9,6 +9,9 @@
         body {
             font-family: sans-serif; background-color: var(--bg); color: white;
             margin: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
+            /* 增加圓點背景紋理，增添質感 */
+            background-image: radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
         .player-section { flex: 1; display: flex; flex-direction: column; position: relative; }
         .opponent { transform: rotate(180deg); background-color: var(--opp-bg); border-bottom: 4px solid white; }
@@ -45,13 +48,38 @@
         
         .coin-btn {
             background: #f1c40f; color: #000; font-weight: bold; border: 4px solid #b8860b; transition: 0.2s;
+            /* 預設為寶貝球樣式 (紅/白/黑) - 使用 CSS 漸層繪製，無版權問題 */
+            background: 
+                radial-gradient(circle, white 18%, #222 19%, #222 22%, transparent 23%),
+                linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%);
+            color: white; font-weight: bold; border: 4px solid #222; transition: 0.2s;
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 80px; height: 80px; border-radius: 50%; padding: 0;
             display: flex; align-items: center; justify-content: center;
             font-size: 2rem; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 2rem; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        .coin-btn.tails {
+            /* 寶貝球背面：沒有中間的按鈕，只有黑線 */
+            background: linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%);
         }
         .coin-animation { animation: flip 0.3s infinite; }
         @keyframes flip { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
+
+        /* 金色閃爍動畫 - 改用偽元素覆蓋，確保不被背景遮擋 */
+        @keyframes flashAnim { 0% { opacity: 0; } 50% { opacity: 0.5; } 100% { opacity: 0; } }
+        body::after {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; pointer-events: none; z-index: 900;
+        }
+        body.flash-gold::after {
+            background-color: #ffd700;
+            animation: flashAnim 0.5s ease-out;
+        }
+        body.flash-gray::after {
+            background-color: #666;
+            animation: flashAnim 0.5s ease-out;
+        }
 
         /* 手機優化：防止誤選文字、優化觸控反應 */
         button, .turn-label, .switch-label, .side-btn, .status-btn, .hp-display {
@@ -204,18 +232,33 @@
             isFlipping = true;
             
             const btn = document.getElementById('coin-btn');
+            btn.classList.remove('tails'); // 投擲前先重置為正面
             btn.classList.add('coin-animation');
-            btn.innerText = "??";
+            btn.innerText = "";
 
             setTimeout(() => {
                 const result = Math.random() > 0.5 ? "O" : "X";
                 btn.classList.remove('coin-animation');
-                btn.innerText = result;
-                btn.style.background = result === "O" ? "#f1c40f" : "#ecf0f1";
+                // btn.innerText = result; // 移除文字顯示
+                
+                // 移除行內樣式，改用 class 切換正反面
+                btn.style.background = ''; 
+                btn.style.color = '';
+                btn.style.textShadow = '';
+                
+                if (result === "X") {
+                    btn.classList.add('tails');
+                    document.body.classList.add('flash-gray');
+                    setTimeout(() => document.body.classList.remove('flash-gray'), 500);
+                }
                 
                 if (result === "O") {
                     headsCount++;
                     document.getElementById('coin-counter').innerText = "O: " + headsCount;
+                    
+                    // 背景閃爍金色
+                    document.body.classList.add('flash-gold');
+                    setTimeout(() => document.body.classList.remove('flash-gold'), 500);
                 }
                 
                 // 第一次投幣：自動連動先後攻
