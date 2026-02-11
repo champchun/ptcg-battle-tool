@@ -31,9 +31,10 @@
 
         .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 10px; margin: 5px; }
         .me .bench-container { background: rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.25); padding: 5px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.4); }
-        .me .bench-slot { background: rgba(255,255,255,0.25); }
-        .switch-label { width: 94%; text-align: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 0; border-radius: 4px; cursor: pointer; margin-bottom: 4px; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .bench-slot { display: flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); padding: 5px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+        .me .bench-slot { background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); }
+        .switch-label { width: 94%; text-align: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 0; border-radius: 4px; cursor: pointer; margin-bottom: 4px; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.1s, box-shadow 0.1s; }
+        .switch-label:active { transform: translateY(1px) scale(0.98); box-shadow: none; }
         .me .switch-label { color: white; }
         .bench-hp { font-size: 1.1rem; font-weight: bold; margin: 2px 0; }
         
@@ -63,14 +64,20 @@
             /* 寶貝球背面：沒有中間的按鈕，只有黑線 */
             background: linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%);
         }
-        .coin-animation { animation: flip 0.3s infinite; }
-        @keyframes flip { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
+        .coin-animation { animation: flip 0.15s infinite, toss 0.45s; }
+        @keyframes flip { 0% { transform: translate(-50%, -50%) scaleY(1); box-shadow: 0 4px 10px rgba(0,0,0,0.3); } 50% { transform: translate(-50%, -50%) scaleY(0); box-shadow: 0 0 0 rgba(0,0,0,0); } 100% { transform: translate(-50%, -50%) scaleY(1); box-shadow: 0 4px 10px rgba(0,0,0,0.3); } }
+        @keyframes toss { 0% { scale: 1; animation-timing-function: ease-out; } 50% { scale: 2.5; animation-timing-function: ease-in; } 100% { scale: 1; } }
 
         /* 金色閃爍動畫 - 改用偽元素覆蓋，確保不被背景遮擋 */
         @keyframes flashAnim { 0% { opacity: 0; } 50% { opacity: 0.5; } 100% { opacity: 0; } }
         body::after {
             content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             opacity: 0; pointer-events: none; z-index: 900;
+            transition: opacity 0.2s;
+        }
+        body.dimming::after {
+            background-color: rgba(0,0,0,0.6);
+            opacity: 1;
         }
         body.flash-gold::after {
             background-color: #ffd700;
@@ -96,6 +103,16 @@
         .st-par { background: #f1c40f; } /* 麻 */
         .st-slp { background: #3498db; } /* 睡 */
         .st-cnf { background: #e84393; } /* 亂 */
+
+        /* HP 數值變動動畫 */
+        @keyframes hp-damage-anim { 0% { transform: scale(1); } 50% { transform: scale(1.5); color: #ff4757; } 100% { transform: scale(1); } }
+        @keyframes hp-heal-anim { 0% { transform: scale(1); } 50% { transform: scale(1.5); color: #2ed573; } 100% { transform: scale(1); } }
+        .hp-damage { animation: hp-damage-anim 0.2s ease-out; }
+        .hp-heal { animation: hp-heal-anim 0.2s ease-out; }
+
+        /* 氣絕狀態 (Fainted) */
+        .bench-slot.fainted { opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
+        .main-battle.fainted > *:not(.turn-label) { opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
     </style>
 </head>
 <body>
@@ -196,12 +213,38 @@
             // 使用 textContent 並增加容錯，避免手機版解析錯誤
             let current = parseInt(el.textContent) || 0;
             el.textContent = Math.max(0, current + amount);
+
+            // 觸發動畫：移除 -> 強制重繪 -> 新增
+            el.classList.remove('hp-damage', 'hp-heal');
+            void el.offsetWidth; 
+            if (amount > 0) {
+                el.classList.add('hp-heal');
+            } else {
+                el.classList.add('hp-damage');
+            }
+            
+            updateFaintedState(el);
         }
 
         function switchHP(activeId, benchId) {
             const activeEl = document.getElementById(activeId);
             const benchEl = document.getElementById(benchId);
             [activeEl.textContent, benchEl.textContent] = [benchEl.textContent, activeEl.textContent];
+            
+            updateFaintedState(activeEl);
+            updateFaintedState(benchEl);
+        }
+
+        function updateFaintedState(el) {
+            const currentHP = parseInt(el.textContent) || 0;
+            const container = el.closest('.bench-slot') || el.closest('.main-battle');
+            if (container) {
+                if (currentHP === 0) {
+                    container.classList.add('fainted');
+                } else {
+                    container.classList.remove('fainted');
+                }
+            }
         }
 
         // 手動切換先後攻（隨時點擊標籤都可以改）
@@ -234,11 +277,13 @@
             const btn = document.getElementById('coin-btn');
             btn.classList.remove('tails'); // 投擲前先重置為正面
             btn.classList.add('coin-animation');
+            document.body.classList.add('dimming');
             btn.innerText = "";
 
             setTimeout(() => {
                 const result = Math.random() > 0.5 ? "O" : "X";
                 btn.classList.remove('coin-animation');
+                document.body.classList.remove('dimming');
                 // btn.innerText = result; // 移除文字顯示
                 
                 // 移除行內樣式，改用 class 切換正反面
@@ -269,7 +314,7 @@
                 }
                 
                 isFlipping = false;
-            }, 600);
+            }, 450);
         }
 
         function resetCoinCount() {
