@@ -30,13 +30,14 @@
         .me .bench-container { background: rgba(0,0,0,0.1); margin-bottom: 30px; }
         .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.25); padding: 5px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.4); }
         .me .bench-slot { background: rgba(255,255,255,0.25); }
-        .switch-label { font-size: 0.65rem; background: rgba(0,0,0,0.2); padding: 2px 5px; border-radius: 3px; cursor: pointer; margin-bottom: 2px; }
+        .switch-label { width: 94%; text-align: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 0; border-radius: 4px; cursor: pointer; margin-bottom: 4px; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .me .switch-label { color: white; }
         .bench-hp { font-size: 1.1rem; font-weight: bold; margin: 2px 0; }
         
         button { width: 35px; height: 35px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; touch-action: manipulation; box-shadow: 0 2px 4px rgba(0,0,0,0.2); font-weight: bold; }
         .me button { color: #333; border-color: white; background: white; }
-        .bench-btn { width: 22px; height: 22px; font-size: 0.8rem; }
+        .bench-controls { display: flex; width: 94%; gap: 4px; margin-top: 2px; }
+        .bench-btn { width: auto; flex: 1; height: 22px; border-radius: 6px; font-size: 0.8rem; padding: 0; }
         
         .controls { position: fixed; right: 5px; top: 50%; transform: translateY(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; align-items: center; }
         .side-btn { background: #444; border: 1px solid #777; padding: 8px; border-radius: 4px; font-size: 0.7rem; color: white; width: 50px; text-align: center; cursor: pointer; }
@@ -155,7 +156,7 @@
             const container = document.getElementById(containerId);
             let html = '';
             for(let i=1; i<=5; i++) {
-                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${prefix}-b${i}')">Switch ${i}</div><div class="bench-hp" id="${prefix}-b${i}">0</div><div style="display:flex; gap:3px;"><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', -10)">-</button><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', 10)">+</button></div></div>`;
+                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${prefix}-b${i}')">Switch ${i}</div><div class="bench-hp" id="${prefix}-b${i}">0</div><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', -10)">-</button><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', 10)">+</button></div></div>`;
             }
             container.innerHTML = html;
         }
