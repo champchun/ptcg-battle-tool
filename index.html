@@ -138,23 +138,23 @@
             </div>
             <div class="status-row">
                 <!-- 毒: 骷髏 -->
-                <div class="status-btn st-psn" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-psn" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>
                 </div>
                 <!-- 燒: 火焰 -->
-                <div class="status-btn st-brn" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-brn" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
                 </div>
                 <!-- 麻: 閃電 -->
-                <div class="status-btn st-par" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-par" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
                 </div>
                 <!-- 睡: 月亮 -->
-                <div class="status-btn st-slp" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-slp" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
                 </div>
                 <!-- 亂: 問號/螺旋 -->
-                <div class="status-btn st-cnf" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-cnf" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
                 </div>
             </div>
@@ -166,7 +166,7 @@
     <div id="coin-btn" class="side-btn coin-btn" onclick="flipCoin()">Flip</div>
     <div class="controls">
         <div id="coin-counter" class="side-btn" style="background: #feca57; color: #333; font-weight: bold;" onclick="resetCoinCount()">O: 0</div>
-        <div class="side-btn reset" onclick="if(confirm('Reset?')) location.reload()">RESET</div>
+        <div class="side-btn reset" onclick="resetGame()">RESET</div>
     </div>
 
     <div class="player-section me">
@@ -180,23 +180,23 @@
             </div>
             <div class="status-row">
                 <!-- 毒 -->
-                <div class="status-btn st-psn" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-psn" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>
                 </div>
                 <!-- 燒 -->
-                <div class="status-btn st-brn" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-brn" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
                 </div>
                 <!-- 麻 -->
-                <div class="status-btn st-par" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-par" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
                 </div>
                 <!-- 睡 -->
-                <div class="status-btn st-slp" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-slp" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
                 </div>
                 <!-- 亂 -->
-                <div class="status-btn st-cnf" onclick="this.classList.toggle('active')">
+                <div class="status-btn st-cnf" onclick="toggleStatus(this)">
                     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
                 </div>
             </div>
@@ -257,6 +257,30 @@
                 } else {
                     container.classList.remove('fainted');
                 }
+            }
+        }
+
+        function toggleStatus(btn) {
+            // 判斷是否為互斥群組 (麻痺、睡眠、混亂)
+            const isExclusive = btn.classList.contains('st-par') || 
+                                btn.classList.contains('st-slp') || 
+                                btn.classList.contains('st-cnf');
+
+            if (isExclusive) {
+                // 如果已經是開啟狀態，再次點擊則關閉 (恢復)
+                if (btn.classList.contains('active')) {
+                    btn.classList.remove('active');
+                } else {
+                    // 如果要開啟，先關閉同組的其他狀態
+                    const row = btn.parentElement;
+                    row.querySelectorAll('.st-par, .st-slp, .st-cnf').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                }
+            } else {
+                // 毒、燒為獨立狀態，直接切換
+                btn.classList.toggle('active');
             }
         }
 
@@ -333,6 +357,38 @@
         function resetCoinCount() {
             headsCount = 0;
             document.getElementById('coin-counter').textContent = "O: 0";
+        }
+
+        function resetGame() {
+            if (!confirm('Reset Game?')) return;
+            
+            // 1. 重置變數
+            isFirstFlip = true;
+            resetCoinCount();
+            
+            // 2. 重置硬幣按鈕
+            const coinBtn = document.getElementById('coin-btn');
+            coinBtn.className = 'side-btn coin-btn'; // 移除 tails, coin-animation 等
+            coinBtn.innerText = "Flip";
+            coinBtn.removeAttribute('style'); // 清除行內樣式 (相容性更好)
+            
+            // 3. 重置回合標籤
+            const meLabel = document.getElementById('turn-me');
+            const oppLabel = document.getElementById('turn-opp');
+            meLabel.innerText = "Waiting"; meLabel.removeAttribute('style');
+            oppLabel.innerText = "Waiting"; oppLabel.removeAttribute('style');
+            
+            // 4. 重置 HP、狀態與 GX
+            document.querySelectorAll('.hp-display, .bench-hp').forEach(el => {
+                el.textContent = "0";
+                el.classList.remove('hp-damage', 'hp-heal');
+                // 移除氣絕狀態
+                const container = el.closest('.bench-slot') || el.closest('.main-battle');
+                if (container) container.classList.remove('fainted');
+            });
+            
+            document.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.gx-marker').forEach(marker => marker.classList.remove('used'));
         }
     </script>
 </body>
