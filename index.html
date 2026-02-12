@@ -9,7 +9,6 @@
         body {
             font-family: sans-serif; background-color: var(--bg); color: white;
             margin: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
-            /* 增加圓點背景紋理，增添質感 */
             background-image: radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px);
             background-size: 20px 20px;
         }
@@ -19,10 +18,17 @@
 
         .main-battle { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 15px; position: relative; }
         .hp-box { display: flex; align-items: center; gap: 15px; margin: 5px 0; }
-        .hp-display { font-size: 2.5rem; font-weight: bold; min-width: 70px; text-align: center; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
-        .me .hp-display { color: white; }
         
-        /* 標籤改為可點擊手動切換 */
+        /* 修改後的輸入框樣式 */
+        .hp-input { 
+            font-size: 2.5rem; font-weight: bold; width: 100px; text-align: center; 
+            color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+            background: transparent; border: none; outline: none;
+            font-family: inherit;
+        }
+        /* 移除 HTML5 數字輸入框的小箭頭 */
+        .hp-input::-webkit-inner-spin-button, .hp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
         .turn-label {
             position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
             background: rgba(0, 0, 0, 0.4); padding: 4px 12px; border-radius: 12px;
@@ -33,14 +39,17 @@
         .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 10px; margin: 5px; }
         .me .bench-container { background: rgba(0,0,0,0.1); margin-bottom: 30px; }
         .bench-slot { display: flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); padding: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
-        .me .bench-slot { background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); }
+        
         .switch-label { width: 94%; text-align: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 8px 0; border-radius: 4px; cursor: pointer; margin-bottom: 6px; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.1s, box-shadow 0.1s; }
         .switch-label:active { transform: translateY(1px) scale(0.98); box-shadow: none; }
-        .me .switch-label { color: white; }
-        .bench-hp { font-size: 1.2rem; font-weight: bold; margin: 4px 0; }
         
+        /* 備戰區輸入框樣式 */
+        .bench-hp-input {
+            font-size: 1.2rem; font-weight: bold; margin: 4px 0; width: 50px;
+            text-align: center; color: white; background: transparent; border: none; outline: none;
+        }
+
         button { width: 35px; height: 35px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; touch-action: manipulation; box-shadow: 0 2px 4px rgba(0,0,0,0.2); font-weight: bold; }
-        .me button { color: #333; border-color: white; background: white; }
         .bench-controls { display: flex; width: 94%; gap: 4px; margin-top: 2px; }
         .bench-btn { width: auto; flex: 1; height: 32px; border-radius: 6px; font-size: 1rem; padding: 0; }
         
@@ -49,114 +58,61 @@
         .reset { background: #e74c3c; }
         
         .coin-btn {
-            background: #f1c40f; color: #000; font-weight: bold; border: 4px solid #b8860b; transition: 0.2s;
-            /* 預設為寶貝球樣式 (紅/白/黑) - 使用 CSS 漸層繪製，無版權問題 */
-            background: 
-                radial-gradient(circle, white 18%, #222 19%, #222 22%, transparent 23%),
-                linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%);
+            background: radial-gradient(circle, white 18%, #222 19%, #222 22%, transparent 23%),
+                        linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%);
             color: white; font-weight: bold; border: 4px solid #222; transition: 0.2s;
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 80px; height: 80px; border-radius: 50%; padding: 0;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-size: 2rem; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
-        .coin-btn.tails {
-            /* 寶貝球背面：沒有中間的按鈕，只有黑線 */
-            background: linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%);
-        }
+        .coin-btn.tails { background: linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%); }
         .coin-animation { animation: flip 0.15s infinite, toss 0.45s; }
-        @keyframes flip { 0% { transform: translate(-50%, -50%) scaleY(1); box-shadow: 0 4px 10px rgba(0,0,0,0.3); } 50% { transform: translate(-50%, -50%) scaleY(0); box-shadow: 0 0 0 rgba(0,0,0,0); } 100% { transform: translate(-50%, -50%) scaleY(1); box-shadow: 0 4px 10px rgba(0,0,0,0.3); } }
-        @keyframes toss { 0% { scale: 1; animation-timing-function: ease-out; } 50% { scale: 2.5; animation-timing-function: ease-in; } 100% { scale: 1; } }
+        @keyframes flip { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
+        @keyframes toss { 0% { scale: 1; } 50% { scale: 2.5; } 100% { scale: 1; } }
 
-        /* 金色閃爍動畫 - 改用偽元素覆蓋，確保不被背景遮擋 */
+        body::after { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; z-index: 900; transition: opacity 0.2s; }
+        body.dimming::after { background-color: rgba(0,0,0,0.6); opacity: 1; }
         @keyframes flashAnim { 0% { opacity: 0; } 50% { opacity: 0.5; } 100% { opacity: 0; } }
-        body::after {
-            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; pointer-events: none; z-index: 900;
-            transition: opacity 0.2s;
-        }
-        body.dimming::after {
-            background-color: rgba(0,0,0,0.6);
-            opacity: 1;
-        }
-        body.flash-gold::after {
-            background-color: #ffd700;
-            animation: flashAnim 0.5s ease-out;
-        }
-        body.flash-gray::after {
-            background-color: #666;
-            animation: flashAnim 0.5s ease-out;
-        }
+        body.flash-gold::after { background-color: #ffd700; animation: flashAnim 0.5s ease-out; }
+        body.flash-gray::after { background-color: #666; animation: flashAnim 0.5s ease-out; }
 
-        /* 手機優化：防止誤選文字、優化觸控反應 */
-        button, .turn-label, .switch-label, .side-btn, .status-btn, .hp-display, .gx-marker {
-            user-select: none; -webkit-user-select: none; touch-action: manipulation;
-        }
-
-        /* 異常狀態按鈕 */
         .status-row { display: flex; gap: 8px; margin: 2px 0; }
-        .status-btn { width: 42px; height: 42px; border-radius: 50%; border: 2px solid white; cursor: pointer; opacity: 0.2; transition: 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status-btn { width: 42px; height: 42px; border-radius: 50%; border: 2px solid white; cursor: pointer; opacity: 0.2; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .status-btn.active { opacity: 1; transform: scale(1.15); box-shadow: 0 0 10px rgba(255,255,255,0.8); }
-        .status-btn svg { width: 27px; height: 27px; fill: white; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.3)); }
-        .st-psn { background: #9b59b6; } /* 毒 */
-        .st-brn { background: #e74c3c; } /* 燒 */
-        .st-par { background: #f1c40f; } /* 麻 */
-        .st-slp { background: #3498db; } /* 睡 */
-        .st-cnf { background: #e84393; } /* 亂 */
+        .status-btn svg { width: 27px; height: 27px; fill: white; }
+        .st-psn { background: #9b59b6; } .st-brn { background: #e74c3c; } .st-par { background: #f1c40f; } .st-slp { background: #3498db; } .st-cnf { background: #e84393; }
 
-        /* HP 數值變動動畫 */
-        @keyframes hp-damage-anim { 0% { transform: scale(1); } 50% { transform: scale(1.5); color: #ff4757; } 100% { transform: scale(1); } }
-        @keyframes hp-heal-anim { 0% { transform: scale(1); } 50% { transform: scale(1.5); color: #2ed573; } 100% { transform: scale(1); } }
+        @keyframes hp-damage-anim { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: #ff4757; } 100% { transform: scale(1); } }
+        @keyframes hp-heal-anim { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: #2ed573; } 100% { transform: scale(1); } }
         .hp-damage { animation: hp-damage-anim 0.2s ease-out; }
         .hp-heal { animation: hp-heal-anim 0.2s ease-out; }
 
-        /* 氣絕狀態 (Fainted) */
-        .bench-slot.fainted { opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
-        .main-battle.fainted > *:not(.turn-label) { opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
+        .bench-slot.fainted, .main-battle.fainted > *:not(.turn-label) { opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
 
-        /* GX 標記按鈕 */
         .gx-marker {
             position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
-            background: linear-gradient(135deg, #0984e3, #74b9ff);
-            color: white; font-weight: 900; font-size: 0.9rem;
-            padding: 4px 8px; border-radius: 4px; border: 2px solid white;
-            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.3s; z-index: 10;
+            background: linear-gradient(135deg, #0984e3, #74b9ff); color: white; font-weight: 900; font-size: 0.9rem;
+            padding: 4px 8px; border-radius: 4px; border: 2px solid white; z-index: 10;
         }
-        .gx-marker.used { background: #444; color: #888; border-color: #666; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .gx-marker.used { background: #444; color: #888; border-color: #666; }
     </style>
 </head>
 <body>
 
     <div class="player-section opponent">
-        <div class="main-battle">
+        <div class="main-battle" id="main-opp-container">
             <div class="gx-marker" onclick="this.classList.toggle('used')">GX</div>
             <div class="hp-box">
                 <button onclick="changeHP('hp-opp', -10)">-</button>
-                <div class="hp-display" id="hp-opp">0</div>
+                <input type="number" class="hp-input" id="hp-opp" value="0" inputmode="numeric" onfocus="this.select()" oninput="updateFaintedState(this)">
                 <button onclick="changeHP('hp-opp', 10)">+</button>
             </div>
             <div class="status-row">
-                <!-- 毒: 骷髏 -->
-                <div class="status-btn st-psn" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>
-                </div>
-                <!-- 燒: 火焰 -->
-                <div class="status-btn st-brn" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
-                </div>
-                <!-- 麻: 閃電 -->
-                <div class="status-btn st-par" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-                </div>
-                <!-- 睡: 月亮 -->
-                <div class="status-btn st-slp" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
-                </div>
-                <!-- 亂: 問號/螺旋 -->
-                <div class="status-btn st-cnf" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
-                </div>
+                <div class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
+                <div class="status-btn st-brn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></div>
+                <div class="status-btn st-par" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
+                <div class="status-btn st-slp" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg></div>
+                <div class="status-btn st-cnf" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
             </div>
             <div id="turn-opp" class="turn-label" onclick="manualToggleTurn()">Waiting</div>
         </div>
@@ -170,51 +126,35 @@
     </div>
 
     <div class="player-section me">
-        <div class="main-battle">
+        <div class="main-battle" id="main-me-container">
             <div class="gx-marker" onclick="this.classList.toggle('used')">GX</div>
             <div id="turn-me" class="turn-label" onclick="manualToggleTurn()">Waiting</div>
             <div class="hp-box">
                 <button onclick="changeHP('hp-me', -10)">-</button>
-                <div class="hp-display" id="hp-me">0</div>
+                <input type="number" class="hp-input" id="hp-me" value="0" inputmode="numeric" onfocus="this.select()" oninput="updateFaintedState(this)">
                 <button onclick="changeHP('hp-me', 10)">+</button>
             </div>
             <div class="status-row">
-                <!-- 毒 -->
-                <div class="status-btn st-psn" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>
-                </div>
-                <!-- 燒 -->
-                <div class="status-btn st-brn" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
-                </div>
-                <!-- 麻 -->
-                <div class="status-btn st-par" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-                </div>
-                <!-- 睡 -->
-                <div class="status-btn st-slp" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
-                </div>
-                <!-- 亂 -->
-                <div class="status-btn st-cnf" onclick="toggleStatus(this)">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
-                </div>
+                <div class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
+                <div class="status-btn st-brn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></div>
+                <div class="status-btn st-par" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
+                <div class="status-btn st-slp" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg></div>
+                <div class="status-btn st-cnf" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
             </div>
         </div>
         <div class="bench-container" id="bench-me"></div>
     </div>
 
     <script>
-        let isFirstFlip = true; // 紀錄是否為第一次投幣
+        let isFirstFlip = true;
         let isFlipping = false;
         let headsCount = 0;
 
-        // 初始化備戰區 (改用 innerHTML 取代 document.write 以提升手機相容性)
         function initBench(containerId, prefix, hpId) {
             const container = document.getElementById(containerId);
             let html = '';
             for(let i=1; i<=5; i++) {
-                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${prefix}-b${i}')">Switch ${i}</div><div class="bench-hp" id="${prefix}-b${i}">0</div><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', -10)">-</button><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', 10)">+</button></div></div>`;
+                html += `<div class="bench-slot" id="${prefix}-slot-${i}"><div class="switch-label" onclick="switchHP('${hpId}', '${prefix}-b${i}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${prefix}-b${i}" value="0" inputmode="numeric" onfocus="this.select()" oninput="updateFaintedState(this)"><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', -10)">-</button><button class="bench-btn" onclick="changeHP('${prefix}-b${i}', 10)">+</button></div></div>`;
             }
             container.innerHTML = html;
         }
@@ -223,18 +163,13 @@
 
         function changeHP(id, amount) {
             const el = document.getElementById(id);
-            // 使用 textContent 並增加容錯，避免手機版解析錯誤
-            let current = parseInt(el.textContent) || 0;
-            el.textContent = Math.max(0, current + amount);
+            let current = parseInt(el.value) || 0;
+            el.value = Math.max(0, current + amount);
 
-            // 觸發動畫：移除 -> 強制重繪 -> 新增
             el.classList.remove('hp-damage', 'hp-heal');
             void el.offsetWidth; 
-            if (amount > 0) {
-                el.classList.add('hp-heal');
-            } else {
-                el.classList.add('hp-damage');
-            }
+            if (amount > 0) el.classList.add('hp-heal');
+            else el.classList.add('hp-damage');
             
             updateFaintedState(el);
         }
@@ -242,77 +177,65 @@
         function switchHP(activeId, benchId) {
             const activeEl = document.getElementById(activeId);
             const benchEl = document.getElementById(benchId);
-            [activeEl.textContent, benchEl.textContent] = [benchEl.textContent, activeEl.textContent];
+            let temp = activeEl.value;
+            activeEl.value = benchEl.value;
+            benchEl.value = temp;
             
             updateFaintedState(activeEl);
             updateFaintedState(benchEl);
         }
 
         function updateFaintedState(el) {
-            const currentHP = parseInt(el.textContent) || 0;
-            const container = el.closest('.bench-slot') || el.closest('.main-battle');
+            const currentHP = parseInt(el.value) || 0;
+            // 尋找父容器來添加氣絕濾鏡
+            let container = el.closest('.bench-slot');
+            if (!container) {
+                // 如果是戰鬥場，對應到 main-battle 容器
+                container = el.id.includes('opp') ? document.getElementById('main-opp-container') : document.getElementById('main-me-container');
+            }
+
             if (container) {
-                if (currentHP === 0) {
-                    container.classList.add('fainted');
-                } else {
-                    container.classList.remove('fainted');
-                }
+                if (currentHP === 0) container.classList.add('fainted');
+                else container.classList.remove('fainted');
             }
         }
 
         function toggleStatus(btn) {
-            // 判斷是否為互斥群組 (麻痺、睡眠、混亂)
-            const isExclusive = btn.classList.contains('st-par') || 
-                                btn.classList.contains('st-slp') || 
-                                btn.classList.contains('st-cnf');
-
+            const isExclusive = btn.classList.contains('st-par') || btn.classList.contains('st-slp') || btn.classList.contains('st-cnf');
             if (isExclusive) {
-                // 如果已經是開啟狀態，再次點擊則關閉 (恢復)
-                if (btn.classList.contains('active')) {
-                    btn.classList.remove('active');
-                } else {
-                    // 如果要開啟，先關閉同組的其他狀態
+                if (btn.classList.contains('active')) btn.classList.remove('active');
+                else {
                     const row = btn.parentElement;
-                    row.querySelectorAll('.st-par, .st-slp, .st-cnf').forEach(el => {
-                        el.classList.remove('active');
-                    });
+                    row.querySelectorAll('.st-par, .st-slp, .st-cnf').forEach(el => el.classList.remove('active'));
                     btn.classList.add('active');
                 }
             } else {
-                // 毒、燒為獨立狀態，直接切換
                 btn.classList.toggle('active');
             }
         }
 
-        // 手動切換先後攻（隨時點擊標籤都可以改）
         function manualToggleTurn() {
             const meLabel = document.getElementById('turn-me');
-            const oppLabel = document.getElementById('turn-opp');
-            if (meLabel.innerText.includes("First")) {
-                setTurnStatus("Second");
-            } else {
-                setTurnStatus("First");
-            }
+            setTurnStatus(meLabel.innerText.includes("First") ? "Second" : "First");
         }
 
         function setTurnStatus(meStatus) {
             const meLabel = document.getElementById('turn-me');
             const oppLabel = document.getElementById('turn-opp');
             if (meStatus === "First") {
-                meLabel.innerText = "First"; meLabel.style.background = "#2980b9"; // Blue
-                oppLabel.innerText = "Second"; oppLabel.style.background = "#c0392b"; // Red
+                meLabel.innerText = "First"; meLabel.style.background = "#2980b9";
+                oppLabel.innerText = "Second"; oppLabel.style.background = "#c0392b";
             } else {
-                meLabel.innerText = "Second"; meLabel.style.background = "#c0392b"; // Red
-                oppLabel.innerText = "First"; oppLabel.style.background = "#2980b9"; // Blue
+                meLabel.innerText = "Second"; meLabel.style.background = "#c0392b";
+                oppLabel.innerText = "First"; oppLabel.style.background = "#2980b9";
             }
         }
 
         function flipCoin() {
             if (isFlipping) return;
             isFlipping = true;
-            
             const btn = document.getElementById('coin-btn');
-            btn.classList.remove('tails'); // 投擲前先重置為正面
+            btn.classList.remove('tails');
             btn.classList.add('coin-animation');
             document.body.classList.add('dimming');
             btn.innerText = "";
@@ -321,35 +244,21 @@
                 const result = Math.random() > 0.5 ? "O" : "X";
                 btn.classList.remove('coin-animation');
                 document.body.classList.remove('dimming');
-                // btn.innerText = result; // 移除文字顯示
-                
-                // 移除行內樣式，改用 class 切換正反面
-                btn.style.background = ''; 
-                btn.style.color = '';
-                btn.style.textShadow = '';
-                
                 if (result === "X") {
                     btn.classList.add('tails');
                     document.body.classList.add('flash-gray');
                     setTimeout(() => document.body.classList.remove('flash-gray'), 500);
-                }
-                
-                if (result === "O") {
+                } else {
                     headsCount++;
                     document.getElementById('coin-counter').innerText = "O: " + headsCount;
-                    
-                    // 背景閃爍金色
                     document.body.classList.add('flash-gold');
                     setTimeout(() => document.body.classList.remove('flash-gold'), 500);
                 }
-                
-                // 第一次投幣：自動連動先後攻
                 if (isFirstFlip) {
                     setTurnStatus(result === "O" ? "First" : "Second");
-                    isFirstFlip = false; // 關閉連動模式
-                    btn.style.boxShadow = "0 0 10px white"; // 提醒連動已結束
+                    isFirstFlip = false;
+                    btn.style.boxShadow = "0 0 15px gold";
                 }
-                
                 isFlipping = false;
             }, 450);
         }
@@ -361,32 +270,20 @@
 
         function resetGame() {
             if (!confirm('Reset Game?')) return;
-            
-            // 1. 重置變數
             isFirstFlip = true;
             resetCoinCount();
-            
-            // 2. 重置硬幣按鈕
             const coinBtn = document.getElementById('coin-btn');
-            coinBtn.className = 'side-btn coin-btn'; // 移除 tails, coin-animation 等
+            coinBtn.className = 'side-btn coin-btn';
             coinBtn.innerText = "Flip";
-            coinBtn.removeAttribute('style'); // 清除行內樣式 (相容性更好)
+            coinBtn.removeAttribute('style');
             
-            // 3. 重置回合標籤
-            const meLabel = document.getElementById('turn-me');
-            const oppLabel = document.getElementById('turn-opp');
-            meLabel.innerText = "Waiting"; meLabel.removeAttribute('style');
-            oppLabel.innerText = "Waiting"; oppLabel.removeAttribute('style');
+            document.getElementById('turn-me').innerText = "Waiting"; document.getElementById('turn-me').removeAttribute('style');
+            document.getElementById('turn-opp').innerText = "Waiting"; document.getElementById('turn-opp').removeAttribute('style');
             
-            // 4. 重置 HP、狀態與 GX
-            document.querySelectorAll('.hp-display, .bench-hp').forEach(el => {
-                el.textContent = "0";
-                el.classList.remove('hp-damage', 'hp-heal');
-                // 移除氣絕狀態
-                const container = el.closest('.bench-slot') || el.closest('.main-battle');
-                if (container) container.classList.remove('fainted');
+            document.querySelectorAll('.hp-input, .bench-hp-input').forEach(el => {
+                el.value = "0";
+                updateFaintedState(el);
             });
-            
             document.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.gx-marker').forEach(marker => marker.classList.remove('used'));
         }
