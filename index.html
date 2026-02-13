@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PTCG Pro - Fully Unified Counter</title>
+    <title>PTCG Pro - Eye-Friendly Version</title>
     <style>
         :root { 
             --bg: #f0f4f8; 
-            --opp-bg: #ff6b6b; 
-            --me-bg: #2c3e50; 
+            /* 調整為更沉穩的底色 */
+            --opp-bg: #b35252;  /* 柔和磚紅 */
+            --me-bg: #3c4d5e;   /* 柔和深藍 */
             --accent: #feca57; 
-            --boost-color: #2ed573; 
-            --heal-color: #2ed573;
-            --damage-color: #ff4757;
+            
+            /* 關鍵修改：降低紅綠按鈕的飽和度 */
+            --boost-color: #6fb98f;  /* 鼠尾草綠 */
+            --heal-color: #78a98d;   /* 柔和綠 */
+            --damage-color: #c96b6b; /* 煙燻紅 */
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -22,103 +25,101 @@
             background-size: 20px 20px;
         }
         .player-section { flex: 1; display: flex; flex-direction: column; position: relative; width: 100%; }
-        .opponent { transform: rotate(180deg); background-color: var(--opp-bg); border-bottom: 2px solid white; }
+        .opponent { transform: rotate(180deg); background-color: var(--opp-bg); border-bottom: 2px solid rgba(255,255,255,0.3); }
         .me { background-color: var(--me-bg); color: white; }
 
         .main-battle { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            padding: 0 10px; position: relative; 
+            /* 增加左右 Padding，防止中央 UI 與兩側 GX/Boost 擋到 */
+            padding: 0 65px; position: relative; 
         }
         
-        .hp-box { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; margin: 5px 0; }
+        .hp-box { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 5px 0; }
         
         .hp-input { 
-            font-size: 3rem; font-weight: bold; width: 100px; text-align: center; 
-            color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            font-size: 3rem; font-weight: bold; width: 110px; text-align: center; 
+            color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             background: transparent; border: none; outline: none;
             transition: transform 0.2s;
         }
         .hp-input::-webkit-inner-spin-button, .hp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* HP 變化動畫 */
-        @keyframes hp-damage-anim { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: var(--damage-color); } 100% { transform: scale(1); } }
-        @keyframes hp-heal-anim { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: var(--heal-color); } 100% { transform: scale(1); } }
+        @keyframes hp-damage-anim { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #ff8e8e; } 100% { transform: scale(1); } }
+        @keyframes hp-heal-anim { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #a2ffd0; } 100% { transform: scale(1); } }
         .hp-damage { animation: hp-damage-anim 0.3s ease-out; }
         .hp-heal { animation: hp-heal-anim 0.3s ease-out; }
 
         .hp-boosted {
-            color: var(--boost-color) !important;
-            text-shadow: 0 0 15px rgba(46, 204, 113, 1) !important;
+            color: #d1ffde !important; /* 降低發光刺眼感 */
+            text-shadow: 0 0 10px rgba(46, 204, 113, 0.6) !important;
         }
 
-        /* 統一物件樣式 */
         .status-btn { 
-            width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; 
-            cursor: pointer; opacity: 0.2; transition: 0.2s; display: flex; align-items: center; justify-content: center; 
+            width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.6); 
+            cursor: pointer; opacity: 0.25; transition: 0.2s; display: flex; align-items: center; justify-content: center; 
             padding: 0;
         }
-        .status-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px white; }
-        .status-btn svg { width: 26px; height: 26px; fill: white; }
+        .status-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3); border-color: white; }
+        .status-btn svg { width: 24px; height: 24px; fill: white; }
 
-        /* 紅綠功能按鈕樣式 (戰鬥區與備戰區通用) */
-        .hp-btn { opacity: 1 !important; box-shadow: 0 3px 6px rgba(0,0,0,0.3); border: 2px solid white; }
-        .hp-btn:active { transform: scale(0.9); }
+        /* 修改按鈕邊框，增加立體感與間隔 */
+        .hp-btn { opacity: 1 !important; box-shadow: 0 3px 6px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.8) !important; }
+        .hp-btn:active { transform: scale(0.92); opacity: 0.8; }
         .hp-btn-minus { background-color: var(--damage-color); }
         .hp-btn-plus { background-color: var(--heal-color); }
 
-        .st-psn { background: #9b59b6; } .st-brn { background: #e74c3c; } .st-par { background: #f1c40f; } .st-slp { background: #3498db; } .st-cnf { background: #e84393; }
+        .st-psn { background: #8e44ad; } .st-brn { background: #d35400; } .st-par { background: #f39c12; } .st-slp { background: #2980b9; } .st-cnf { background: #c0392b; }
 
+        /* 修正擋到的問題：讓 GX 與 Boost 更靠邊緣一點 */
         .gx-marker { 
-            position: absolute; left: 10px; top: 50%; transform: translateY(-50%); 
-            background: linear-gradient(135deg, #0984e3, #74b9ff); color: white; 
-            font-weight: 900; font-size: 0.8rem; padding: 8px 6px; border-radius: 6px; 
-            border: 2px solid white; z-index: 10; writing-mode: vertical-lr; text-align: center;
+            position: absolute; left: 8px; top: 50%; transform: translateY(-50%); 
+            background: linear-gradient(135deg, #2980b9, #3498db); color: white; 
+            font-weight: 900; font-size: 0.75rem; padding: 10px 5px; border-radius: 4px; 
+            border: 1.5px solid white; z-index: 10; writing-mode: vertical-lr; text-align: center;
         }
-        .gx-marker.used { background: #444; color: #888; border-color: #666; }
+        .gx-marker.used { background: #555; color: #aaa; border-color: #777; opacity: 0.6; }
 
         .group-boost-panel {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; align-items: center; gap: 2px; z-index: 100;
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 100;
         }
-        .boost-label { font-size: 0.5rem; color: rgba(255,255,255,0.7); font-weight: bold; }
+        .boost-label { font-size: 0.5rem; color: rgba(255,255,255,0.6); font-weight: bold; }
         .boost-input {
-            width: 45px; height: 35px; background: rgba(255,255,255,0.1); 
-            border: 2px solid rgba(255,255,255,0.3); border-radius: 8px;
-            text-align: center; font-weight: bold; font-size: 1.1rem; color: white;
+            width: 42px; height: 32px; background: rgba(0,0,0,0.2); 
+            border: 1.5px solid rgba(255,255,255,0.3); border-radius: 6px;
+            text-align: center; font-weight: bold; font-size: 1rem; color: white;
             outline: none;
         }
-        .boost-input.active { border-color: var(--boost-color); background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 10px var(--boost-color); }
+        .boost-input.active { border-color: var(--boost-color); background: rgba(111, 185, 143, 0.2); }
 
-        /* 備戰區優化 */
-        .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 10px; margin: 5px; }
-        .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.08); padding: 5px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); min-width: 0; }
-        .switch-label { width: 90%; text-align: center; font-size: 0.6rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 3px 0; border-radius: 4px; cursor: pointer; margin-bottom: 4px; }
+        .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 4px; background: rgba(0,0,0,0.15); border-radius: 10px; margin: 4px; }
+        .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.05); padding: 5px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-width: 0; }
+        .switch-label { width: 90%; text-align: center; font-size: 0.6rem; font-weight: bold; background: rgba(0,0,0,0.2); padding: 3px 0; border-radius: 4px; cursor: pointer; margin-bottom: 5px; color: rgba(255,255,255,0.8); }
         .bench-hp-input { font-size: 1.1rem; font-weight: bold; width: 100%; text-align: center; color: white; background: transparent; border: none; outline: none; }
 
-        /* 備戰區按鈕縮小適配 */
-        .bench-controls { display: flex; width: 95%; gap: 4px; justify-content: center; }
-        .bench-btn { width: 30px; height: 30px; } /* 備戰區圓圈稍微縮小 */
+        .bench-controls { display: flex; width: 95%; gap: 3px; justify-content: center; }
+        .bench-btn { width: 28px; height: 28px; border-width: 1.5px !important; } 
         
-        .center-controls { position: fixed; left: 0; top: 50%; width: 100%; transform: translateY(-50%); pointer-events: none; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 5px; box-sizing: border-box; }
-        .side-group { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
-        .side-btn { background: #444; border: 1px solid #777; padding: 8px 4px; border-radius: 6px; font-size: 0.65rem; color: white; width: 50px; text-align: center; cursor: pointer; }
-        .reset { background: #e74c3c; }
+        .center-controls { position: fixed; left: 0; top: 50%; width: 100%; transform: translateY(-50%); pointer-events: none; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; box-sizing: border-box; }
+        .side-group { display: flex; flex-direction: column; gap: 8px; pointer-events: auto; }
+        .side-btn { background: #333; border: 1px solid #555; padding: 6px 4px; border-radius: 4px; font-size: 0.65rem; color: #ddd; width: 45px; text-align: center; cursor: pointer; }
+        .reset { background: #a54a4a; border-color: #c96b6b; }
         
         .coin-btn {
             pointer-events: auto;
-            background: radial-gradient(circle, white 18%, #222 19%, #222 22%, transparent 23%),
-                        linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%);
-            border: 4px solid #222; width: 64px; height: 64px; border-radius: 50%; 
+            background: radial-gradient(circle, white 18%, #333 19%, #333 22%, transparent 23%),
+                        linear-gradient(180deg, #d34a4a 46%, #333 46%, #333 54%, #ffffff 54%);
+            border: 3px solid #222; width: 56px; height: 56px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; box-shadow: 0 4px 10px rgba(0,0,0,0.4); color: white; text-shadow: 0 2px 4px black;
+            font-size: 1.2rem; box-shadow: 0 4px 8px rgba(0,0,0,0.4); color: white; text-shadow: 0 1px 3px black;
             position: absolute; left: 50%; transform: translateX(-50%);
         }
         .coin-animation { animation: flip 0.15s infinite, toss 0.45s; }
         @keyframes flip { 0%, 100% { transform: translateX(-50%) scaleY(1); } 50% { transform: translateX(-50%) scaleY(0); } }
-        @keyframes toss { 0%, 100% { margin-top: 0; } 50% { margin-top: -80px; scale: 1.2; } }
+        @keyframes toss { 0%, 100% { margin-top: 0; } 50% { margin-top: -60px; scale: 1.15; } }
 
-        .status-row { display: flex; gap: 8px; margin-top: 5px; }
-        .fainted { opacity: 0.3; filter: grayscale(100%); transition: 0.3s; }
+        .status-row { display: flex; gap: 6px; margin-top: 5px; }
+        .fainted { opacity: 0.35; filter: grayscale(80%); transition: 0.3s; }
     </style>
 </head>
 <body>
@@ -148,7 +149,7 @@
 
     <div class="center-controls">
         <div class="side-group">
-            <div id="coin-counter" class="side-btn" style="background: var(--accent); color: #333; font-weight: bold;" onclick="resetCoinCount()">O: 0</div>
+            <div id="coin-counter" class="side-btn" style="background: var(--accent); color: #333; font-weight: bold; border:none;" onclick="resetCoinCount()">O: 0</div>
         </div>
         <div id="coin-btn" class="coin-btn" onclick="flipCoin()">Flip</div>
         <div class="side-group">
@@ -180,6 +181,7 @@
     </div>
 
     <script>
+        // 保持所有原本的邏輯不變
         let headsCount = 0, isFlipping = false;
         let lastBoost = { me: 0, opp: 0 };
 
@@ -188,7 +190,7 @@
             let html = '';
             for(let i=1; i<=5; i++) {
                 const id = `${prefix}-b${i}`;
-                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this, 0)"><div class="bench-controls"><button class="status-btn hp-btn hp-btn-minus bench-btn" onclick="changeHP('${id}', -10)"></button><button class="status-btn hp-btn hp-btn-plus bench-btn" onclick="changeHP('${id}', 10)"></button></div></div>`;
+                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">SW ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this, 0)"><div class="bench-controls"><button class="status-btn hp-btn hp-btn-minus bench-btn" onclick="changeHP('${id}', -10)"></button><button class="status-btn hp-btn hp-btn-plus bench-btn" onclick="changeHP('${id}', 10)"></button></div></div>`;
             }
             container.innerHTML = html;
         }
@@ -227,10 +229,9 @@
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
             let container = el.closest('.bench-slot') || (side === 'me' ? document.getElementById('main-me-container') : document.getElementById('main-opp-container'));
             
-            // 修復：動畫邏輯
             if (changeAmount !== 0) {
                 el.classList.remove('hp-damage', 'hp-heal');
-                void el.offsetWidth; // 重新觸發重繪
+                void el.offsetWidth;
                 el.classList.add(changeAmount > 0 ? 'hp-heal' : 'hp-damage');
             }
 
