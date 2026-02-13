@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PTCG Pro - Unified Design</title>
+    <title>PTCG Pro - Fully Unified Counter</title>
     <style>
         :root { 
             --bg: #f0f4f8; 
@@ -11,6 +11,8 @@
             --me-bg: #2c3e50; 
             --accent: #feca57; 
             --boost-color: #2ed573; 
+            --heal-color: #2ed573;
+            --damage-color: #ff4757;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -28,49 +30,43 @@
             padding: 0 10px; position: relative; 
         }
         
-        /* 戰鬥區容器 */
-        .hp-box { 
-            display: flex; align-items: center; justify-content: center; 
-            gap: 15px; width: 100%; margin: 5px 0; 
-        }
+        .hp-box { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; margin: 5px 0; }
         
         .hp-input { 
-            font-size: 3rem; font-weight: bold; 
-            width: 100px; text-align: center; 
+            font-size: 3rem; font-weight: bold; width: 100px; text-align: center; 
             color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
             background: transparent; border: none; outline: none;
+            transition: transform 0.2s;
         }
         .hp-input::-webkit-inner-spin-button, .hp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* HP 變化動畫 */
+        @keyframes hp-damage-anim { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: var(--damage-color); } 100% { transform: scale(1); } }
+        @keyframes hp-heal-anim { 0% { transform: scale(1); } 50% { transform: scale(1.2); color: var(--heal-color); } 100% { transform: scale(1); } }
+        .hp-damage { animation: hp-damage-anim 0.3s ease-out; }
+        .hp-heal { animation: hp-heal-anim 0.3s ease-out; }
 
         .hp-boosted {
             color: var(--boost-color) !important;
             text-shadow: 0 0 15px rgba(46, 204, 113, 1) !important;
         }
 
-        /* 統一的按鈕物件樣式 (與異常狀態相同) */
+        /* 統一物件樣式 */
         .status-btn { 
-            width: 45px; height: 45px; 
-            border-radius: 50%; border: 2px solid white; 
-            background: transparent; /* 保持透明背景 */
-            color: white; font-size: 1.8rem; font-weight: bold;
-            cursor: pointer; opacity: 0.2; 
-            display: flex; align-items: center; justify-content: center; 
-            transition: 0.2s; padding: 0; line-height: 1;
+            width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; 
+            cursor: pointer; opacity: 0.2; transition: 0.2s; display: flex; align-items: center; justify-content: center; 
+            padding: 0;
         }
-        
-        /* 戰鬥區的加減按鈕：預設不透明 */
-        .hp-box .status-btn { opacity: 1; background: rgba(255,255,255,0.1); }
-        .hp-box .status-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.3); }
-
         .status-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px white; }
         .status-btn svg { width: 26px; height: 26px; fill: white; }
-        
-        /* 異常狀態專屬背景色 */
-        .st-psn { background: #9b59b6 !important; } 
-        .st-brn { background: #e74c3c !important; } 
-        .st-par { background: #f1c40f !important; } 
-        .st-slp { background: #3498db !important; } 
-        .st-cnf { background: #e84393 !important; }
+
+        /* 紅綠功能按鈕樣式 (戰鬥區與備戰區通用) */
+        .hp-btn { opacity: 1 !important; box-shadow: 0 3px 6px rgba(0,0,0,0.3); border: 2px solid white; }
+        .hp-btn:active { transform: scale(0.9); }
+        .hp-btn-minus { background-color: var(--damage-color); }
+        .hp-btn-plus { background-color: var(--heal-color); }
+
+        .st-psn { background: #9b59b6; } .st-brn { background: #e74c3c; } .st-par { background: #f1c40f; } .st-slp { background: #3498db; } .st-cnf { background: #e84393; }
 
         .gx-marker { 
             position: absolute; left: 10px; top: 50%; transform: translateY(-50%); 
@@ -91,16 +87,17 @@
             text-align: center; font-weight: bold; font-size: 1.1rem; color: white;
             outline: none;
         }
-        .boost-input.active { border-color: var(--boost-color); background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 10px var(--boost-color); color: var(--boost-color); }
+        .boost-input.active { border-color: var(--boost-color); background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 10px var(--boost-color); }
 
+        /* 備戰區優化 */
         .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 10px; margin: 5px; }
         .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.08); padding: 5px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); min-width: 0; }
         .switch-label { width: 90%; text-align: center; font-size: 0.6rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 3px 0; border-radius: 4px; cursor: pointer; margin-bottom: 4px; }
         .bench-hp-input { font-size: 1.1rem; font-weight: bold; width: 100%; text-align: center; color: white; background: transparent; border: none; outline: none; }
 
-        /* 備戰區小按鈕 */
-        .bench-controls { display: flex; width: 95%; gap: 2px; }
-        .bench-btn { flex: 1; height: 28px; border-radius: 4px; border: 1px solid white; background: transparent; color: white; font-size: 0.9rem; font-weight: bold; }
+        /* 備戰區按鈕縮小適配 */
+        .bench-controls { display: flex; width: 95%; gap: 4px; justify-content: center; }
+        .bench-btn { width: 30px; height: 30px; } /* 備戰區圓圈稍微縮小 */
         
         .center-controls { position: fixed; left: 0; top: 50%; width: 100%; transform: translateY(-50%); pointer-events: none; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 5px; box-sizing: border-box; }
         .side-group { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
@@ -134,9 +131,9 @@
                 <input type="number" id="boost-opp" class="boost-input" value="0" step="10" onchange="updateBoost('opp')">
             </div>
             <div class="hp-box">
-                <button class="status-btn" onclick="changeHP('hp-opp', -10)">-</button>
+                <button class="status-btn hp-btn hp-btn-minus" onclick="changeHP('hp-opp', -10)"></button>
                 <input type="number" class="hp-input" id="hp-opp" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)">
-                <button class="status-btn" onclick="changeHP('hp-opp', 10)">+</button>
+                <button class="status-btn hp-btn hp-btn-plus" onclick="changeHP('hp-opp', 10)"></button>
             </div>
             <div class="status-row">
                 <div class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
@@ -167,9 +164,9 @@
                 <input type="number" id="boost-me" class="boost-input" value="0" step="10" onchange="updateBoost('me')">
             </div>
             <div class="hp-box">
-                <button class="status-btn" onclick="changeHP('hp-me', -10)">-</button>
+                <button class="status-btn hp-btn hp-btn-minus" onclick="changeHP('hp-me', -10)"></button>
                 <input type="number" class="hp-input" id="hp-me" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)">
-                <button class="status-btn" onclick="changeHP('hp-me', 10)">+</button>
+                <button class="status-btn hp-btn hp-btn-plus" onclick="changeHP('hp-me', 10)"></button>
             </div>
             <div class="status-row">
                 <div class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
@@ -191,7 +188,7 @@
             let html = '';
             for(let i=1; i<=5; i++) {
                 const id = `${prefix}-b${i}`;
-                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)"><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${id}', -10)">-</button><button class="bench-btn" onclick="changeHP('${id}', 10)">+</button></div></div>`;
+                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this, 0)"><div class="bench-controls"><button class="status-btn hp-btn hp-btn-minus bench-btn" onclick="changeHP('${id}', -10)"></button><button class="status-btn hp-btn hp-btn-plus bench-btn" onclick="changeHP('${id}', 10)"></button></div></div>`;
             }
             container.innerHTML = html;
         }
@@ -208,7 +205,7 @@
                 let cur = parseInt(hpEl.value) || 0;
                 if (cur > 0 || diff < 0) {
                     hpEl.value = Math.max(0, cur + diff);
-                    handleHPInput(hpEl);
+                    handleHPInput(hpEl, diff);
                 }
             });
             lastBoost[side] = val;
@@ -221,14 +218,22 @@
             if (boostVal > 0 && val > 0 && !el.classList.contains('hp-boosted')) {
                 el.value = val + boostVal;
             }
-            handleHPInput(el);
+            handleHPInput(el, 0);
         }
 
-        function handleHPInput(el) {
+        function handleHPInput(el, changeAmount) {
             const hp = parseInt(el.value) || 0;
             const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
             let container = el.closest('.bench-slot') || (side === 'me' ? document.getElementById('main-me-container') : document.getElementById('main-opp-container'));
+            
+            // 修復：動畫邏輯
+            if (changeAmount !== 0) {
+                el.classList.remove('hp-damage', 'hp-heal');
+                void el.offsetWidth; // 重新觸發重繪
+                el.classList.add(changeAmount > 0 ? 'hp-heal' : 'hp-damage');
+            }
+
             hp === 0 ? container.classList.add('fainted') : container.classList.remove('fainted');
             (boostVal > 0 && hp >= boostVal && hp > 0) ? el.classList.add('hp-boosted') : el.classList.remove('hp-boosted');
         }
@@ -238,18 +243,19 @@
             let hp = parseInt(el.value) || 0;
             const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
+            
             if (hp === 0 && amt > 0 && boostVal > 0) {
                 el.value = boostVal; 
             } else {
                 el.value = Math.max(0, hp + amt);
             }
-            handleHPInput(el);
+            handleHPInput(el, amt);
         }
 
         function switchHP(activeId, benchId) {
             const a = document.getElementById(activeId), b = document.getElementById(benchId);
             [a.value, b.value] = [b.value, a.value];
-            handleHPInput(a); handleHPInput(b);
+            handleHPInput(a, 0); handleHPInput(b, 0);
         }
 
         function toggleStatus(btn) {
