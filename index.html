@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PTCG Pro - Group Boost Mode</title>
+    <title>PTCG Pro - Smart Boost Pro</title>
     <style>
         :root { --bg: #f0f4f8; --opp-bg: #ff6b6b; --me-bg: #48dbfb; --accent: #feca57; --boost-color: #2ed573; }
         body {
@@ -20,52 +20,51 @@
         .hp-box { display: flex; align-items: center; gap: 15px; margin: 5px 0; }
         
         .hp-input { 
-            font-size: 2.5rem; font-weight: bold; width: 100px; text-align: center; 
+            font-size: 2.8rem; font-weight: bold; width: 110px; text-align: center; 
             color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
             background: transparent; border: none; outline: none;
             transition: all 0.3s ease;
         }
         .hp-input::-webkit-inner-spin-button, .hp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* 群體強化樣式 */
         .hp-boosted {
             color: var(--boost-color) !important;
             text-shadow: 0 0 15px rgba(46, 204, 113, 0.9) !important;
-            transform: scale(1.05);
         }
 
-        /* 群體強化面板樣式：替換掉原本的 turn-label 位置 */
         .group-boost-panel {
             position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-            background: rgba(0,0,0,0.3); padding: 8px; border-radius: 12px;
-            display: flex; flex-direction: column; gap: 5px; z-index: 100;
-            border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(2px);
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            z-index: 100;
         }
-
+        .boost-label { font-size: 0.6rem; color: rgba(255,255,255,0.8); font-weight: bold; }
+        
         .boost-input {
-            width: 45px; background: white; border: none; border-radius: 4px;
-            text-align: center; font-weight: bold; font-size: 0.9rem; padding: 2px; color: #333;
+            width: 45px; height: 35px; background: rgba(255,255,255,0.2); 
+            border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
+            text-align: center; font-weight: bold; font-size: 1.1rem; color: white;
+            outline: none; transition: 0.3s;
         }
-        .boost-toggle {
-            background: #7f8c8d; color: white; border: none; border-radius: 4px;
-            font-size: 0.7rem; padding: 4px 8px; cursor: pointer; font-weight: bold;
+        .boost-input.active {
+            border-color: var(--boost-color);
+            background: rgba(46, 204, 113, 0.2);
+            box-shadow: 0 0 10px var(--boost-color);
+            color: var(--boost-color);
         }
-        .boost-toggle.active { background: #27ae60; box-shadow: 0 0 8px #27ae60; }
 
         .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 10px; margin: 5px; }
         .me .bench-container { background: rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .bench-slot { display: flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); padding: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+        .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.15); padding: 8px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
         
         .switch-label { width: 94%; text-align: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 8px 0; border-radius: 4px; cursor: pointer; margin-bottom: 6px; color: white; }
-        .bench-hp-input { font-size: 1.2rem; font-weight: bold; margin: 4px 0; width: 50px; text-align: center; color: white; background: transparent; border: none; outline: none; }
+        .bench-hp-input { font-size: 1.2rem; font-weight: bold; margin: 4px 0; width: 55px; text-align: center; color: white; background: transparent; border: none; outline: none; }
 
-        button { width: 35px; height: 35px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; font-weight: bold; touch-action: manipulation; }
+        button { width: 35px; height: 35px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; font-weight: bold; touch-action: manipulation; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         .bench-controls { display: flex; width: 94%; gap: 4px; }
         .bench-btn { flex: 1; height: 32px; border-radius: 6px; font-size: 1rem; }
         
-        .controls { position: fixed; right: 5px; top: 50%; transform: translateY(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .side-btn { background: #444; border: 1px solid #777; padding: 8px; border-radius: 4px; font-size: 0.7rem; color: white; width: 50px; text-align: center; cursor: pointer; }
+        .controls { position: fixed; left: 8px; top: 50%; transform: translateY(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .side-btn { background: #444; border: 1px solid #777; padding: 8px; border-radius: 6px; font-size: 0.75rem; color: white; width: 55px; text-align: center; cursor: pointer; }
         .reset { background: #e74c3c; }
         
         .coin-btn {
@@ -73,22 +72,22 @@
                         linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%);
             color: white; font-weight: bold; border: 4px solid #222; 
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .coin-btn.tails { background: linear-gradient(180deg, #ee1515 46%, #222 46%, #222 54%, #ffffff 54%); }
         .coin-animation { animation: flip 0.15s infinite, toss 0.45s; }
         @keyframes flip { 0% { transform: translate(-50%, -50%) scaleY(1); } 50% { transform: translate(-50%, -50%) scaleY(0); } 100% { transform: translate(-50%, -50%) scaleY(1); } }
-        @keyframes toss { 0% { scale: 1; } 50% { scale: 2.5; } 100% { scale: 1; } }
+        @keyframes toss { 0% { scale: 1; } 50% { scale: 2.2; } 100% { scale: 1; } }
 
         .status-row { display: flex; gap: 8px; margin: 2px 0; }
         .status-btn { width: 42px; height: 42px; border-radius: 50%; border: 2px solid white; cursor: pointer; opacity: 0.2; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .status-btn.active { opacity: 1; transform: scale(1.15); box-shadow: 0 0 10px white; }
+        .status-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 10px white; }
         .status-btn svg { width: 27px; height: 27px; fill: white; }
         .st-psn { background: #9b59b6; } .st-brn { background: #e74c3c; } .st-par { background: #f1c40f; } .st-slp { background: #3498db; } .st-cnf { background: #e84393; }
 
-        .fainted { opacity: 0.4; filter: grayscale(100%); transition: 0.3s; }
-        .gx-marker { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #0984e3, #74b9ff); color: white; font-weight: 900; font-size: 0.9rem; padding: 4px 8px; border-radius: 4px; border: 2px solid white; z-index: 10; }
+        .fainted { opacity: 0.3; filter: grayscale(100%); transition: 0.3s; }
+        .gx-marker { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #0984e3, #74b9ff); color: white; font-weight: 900; font-size: 0.9rem; padding: 6px 12px; border-radius: 6px; border: 2px solid white; z-index: 10; }
         .gx-marker.used { background: #444; color: #888; border-color: #666; }
     </style>
 </head>
@@ -97,13 +96,13 @@
     <div class="player-section opponent">
         <div class="main-battle" id="main-opp-container">
             <div class="group-boost-panel">
-                <input type="number" id="boost-val-opp" class="boost-input" value="40" step="10">
-                <button id="boost-toggle-opp" class="boost-toggle" onclick="toggleBoost('opp')">OFF</button>
+                <span class="boost-label">BOOST ↑</span>
+                <input type="number" id="boost-opp" class="boost-input" value="0" step="10" oninput="updateBoost('opp')">
             </div>
             <div class="gx-marker" onclick="this.classList.toggle('used')">GX</div>
             <div class="hp-box">
                 <button onclick="changeHP('hp-opp', -10)">-</button>
-                <input type="number" class="hp-input" id="hp-opp" value="0" inputmode="numeric" onfocus="this.select()" oninput="handleHPInput(this)">
+                <input type="number" class="hp-input" id="hp-opp" value="0" inputmode="numeric" onfocus="this.select()" onblur="handleHPBlur(this)" oninput="handleHPInput(this)">
                 <button onclick="changeHP('hp-opp', 10)">+</button>
             </div>
             <div class="status-row">
@@ -117,22 +116,22 @@
         <div class="bench-container" id="bench-opp"></div>
     </div>
 
-    <div id="coin-btn" class="side-btn coin-btn" onclick="flipCoin()">Flip</div>
+    <div id="coin-btn" class="coin-btn" onclick="flipCoin()">Flip</div>
     <div class="controls">
-        <div id="coin-counter" class="side-btn" style="background: #feca57; color: #333; font-weight: bold;" onclick="resetCoinCount()">O: 0</div>
+        <div id="coin-counter" class="side-btn" style="background: var(--accent); color: #333; font-weight: bold;" onclick="resetCoinCount()">O: 0</div>
         <div class="side-btn reset" onclick="resetGame()">RESET</div>
     </div>
 
     <div class="player-section me">
         <div class="main-battle" id="main-me-container">
             <div class="group-boost-panel">
-                <input type="number" id="boost-val-me" class="boost-input" value="40" step="10">
-                <button id="boost-toggle-me" class="boost-toggle" onclick="toggleBoost('me')">OFF</button>
+                <span class="boost-label">BOOST ↑</span>
+                <input type="number" id="boost-me" class="boost-input" value="0" step="10" oninput="updateBoost('me')">
             </div>
             <div class="gx-marker" onclick="this.classList.toggle('used')">GX</div>
             <div class="hp-box">
                 <button onclick="changeHP('hp-me', -10)">-</button>
-                <input type="number" class="hp-input" id="hp-me" value="0" inputmode="numeric" onfocus="this.select()" oninput="handleHPInput(this)">
+                <input type="number" class="hp-input" id="hp-me" value="0" inputmode="numeric" onfocus="this.select()" onblur="handleHPBlur(this)" oninput="handleHPInput(this)">
                 <button onclick="changeHP('hp-me', 10)">+</button>
             </div>
             <div class="status-row">
@@ -147,91 +146,91 @@
     </div>
 
     <script>
-        let isFlipping = false;
-        let headsCount = 0;
-        let boostStatus = { me: false, opp: false };
+        let headsCount = 0, isFlipping = false;
+        let lastBoost = { me: 0, opp: 0 };
 
         function initBench(containerId, prefix, hpId) {
             const container = document.getElementById(containerId);
             let html = '';
             for(let i=1; i<=5; i++) {
                 const id = `${prefix}-b${i}`;
-                html += `<div class="bench-slot" id="${prefix}-slot-${i}"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" oninput="handleHPInput(this)"><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${id}', -10)">-</button><button class="bench-btn" onclick="changeHP('${id}', 10)">+</button></div></div>`;
+                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onblur="handleHPBlur(this)" oninput="handleHPInput(this)"><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${id}', -10)">-</button><button class="bench-btn" onclick="changeHP('${id}', 10)">+</button></div></div>`;
             }
             container.innerHTML = html;
         }
         initBench('bench-opp', 'opp', 'hp-opp');
         initBench('bench-me', 'me', 'hp-me');
 
-        function toggleBoost(side) {
-            const btn = document.getElementById(`boost-toggle-${side}`);
-            const boostVal = parseInt(document.getElementById(`boost-val-${side}`).value) || 0;
-            boostStatus[side] = !boostStatus[side];
-
+        function updateBoost(side) {
+            const el = document.getElementById(`boost-${side}`);
+            const val = parseInt(el.value) || 0;
+            const diff = val - lastBoost[side];
+            if (val > 0) el.classList.add('active'); else el.classList.remove('active');
             const selector = side === 'me' ? '.me .hp-input, .me .bench-hp-input' : '.opponent .hp-input, .opponent .bench-hp-input';
-            
-            if (boostStatus[side]) {
-                btn.innerText = "ON"; btn.classList.add('active');
-                document.querySelectorAll(selector).forEach(el => {
-                    let cur = parseInt(el.value) || 0;
-                    if (cur > 0) { el.value = cur + boostVal; el.classList.add('hp-boosted'); }
-                });
-            } else {
-                btn.innerText = "OFF"; btn.classList.remove('active');
-                document.querySelectorAll(selector).forEach(el => {
-                    let cur = parseInt(el.value) || 0;
-                    el.value = Math.max(0, cur - boostVal); el.classList.remove('hp-boosted');
-                });
+            document.querySelectorAll(selector).forEach(hpEl => {
+                let cur = parseInt(hpEl.value) || 0;
+                if (cur > 0 || diff < 0) {
+                    hpEl.value = Math.max(0, cur + diff);
+                    handleHPInput(hpEl);
+                }
+            });
+            lastBoost[side] = val;
+        }
+
+        // 核心優化：手動輸入後的加成邏輯
+        function handleHPBlur(el) {
+            const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
+            const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
+            let currentHP = parseInt(el.value) || 0;
+
+            // 只有當 boost 開啟，且輸入了大於 0 的數值，且該數值尚未包含加成時
+            if (boostVal > 0 && currentHP > 0 && !el.dataset.hasBoost) {
+                el.value = currentHP + boostVal;
+                el.dataset.hasBoost = "true"; // 標記已加成
             }
+            handleHPInput(el);
         }
 
         function handleHPInput(el) {
-            updateFaintedState(el);
-            const side = el.id.includes('me') ? 'me' : 'opp';
-            if (boostStatus[side] && parseInt(el.value) > 0) el.classList.add('hp-boosted');
-            else el.classList.remove('hp-boosted');
+            const hp = parseInt(el.value) || 0;
+            const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
+            const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
+            let container = el.closest('.bench-slot') || (side === 'me' ? document.getElementById('main-me-container') : document.getElementById('main-opp-container'));
+            
+            hp === 0 ? container.classList.add('fainted') : container.classList.remove('fainted');
+            
+            if (boostVal > 0 && hp > 0) {
+                el.classList.add('hp-boosted');
+                el.dataset.hasBoost = "true";
+            } else {
+                el.classList.remove('hp-boosted');
+                delete el.dataset.hasBoost;
+            }
         }
 
-        function changeHP(id, amount) {
+        function changeHP(id, amt) {
             const el = document.getElementById(id);
-            let current = parseInt(el.value) || 0;
-            el.value = Math.max(0, current + amount);
+            let hp = parseInt(el.value) || 0;
+            const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
+            const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
 
-            el.classList.remove('hp-damage', 'hp-heal');
-            void el.offsetWidth; 
-            if (amount > 0) el.classList.add('hp-heal');
-            else el.classList.add('hp-damage');
-            
+            if (hp === 0 && amt > 0 && boostVal > 0) {
+                el.value = boostVal; // 從 0 開始跳加成值
+            } else {
+                el.value = Math.max(0, hp + amt);
+            }
             handleHPInput(el);
         }
 
         function switchHP(activeId, benchId) {
-            const activeEl = document.getElementById(activeId);
-            const benchEl = document.getElementById(benchId);
-            let temp = activeEl.value;
-            activeEl.value = benchEl.value;
-            benchEl.value = temp;
-            
-            handleHPInput(activeEl);
-            handleHPInput(benchEl);
-        }
-
-        function updateFaintedState(el) {
-            const currentHP = parseInt(el.value) || 0;
-            let container = el.closest('.bench-slot');
-            if (!container) {
-                container = el.id.includes('opp') ? document.getElementById('main-opp-container') : document.getElementById('main-me-container');
-            }
-
-            if (container) {
-                if (currentHP === 0) container.classList.add('fainted');
-                else container.classList.remove('fainted');
-            }
+            const a = document.getElementById(activeId), b = document.getElementById(benchId);
+            [a.value, b.value] = [b.value, a.value];
+            handleHPInput(a); handleHPInput(b);
         }
 
         function toggleStatus(btn) {
-            const isExclusive = btn.classList.contains('st-par') || btn.classList.contains('st-slp') || btn.classList.contains('st-cnf');
-            if (isExclusive && !btn.classList.contains('active')) {
+            const isEx = ['st-par', 'st-slp', 'st-cnf'].some(c => btn.classList.contains(c));
+            if (isEx && !btn.classList.contains('active')) {
                 btn.parentElement.querySelectorAll('.st-par, .st-slp, .st-cnf').forEach(el => el.classList.remove('active'));
             }
             btn.classList.toggle('active');
@@ -243,37 +242,19 @@
             const btn = document.getElementById('coin-btn');
             btn.classList.remove('tails', 'coin-animation');
             void btn.offsetWidth; btn.classList.add('coin-animation');
-            document.body.classList.add('dimming');
             btn.innerText = "";
-
             setTimeout(() => {
-                const result = Math.random() > 0.5 ? "O" : "X";
-                btn.classList.remove('coin-animation');
-                document.body.classList.remove('dimming');
-                btn.innerText = result;
-                if (result === "X") {
-                    btn.classList.add('tails');
-                    document.body.classList.add('flash-gray');
-                    setTimeout(() => document.body.classList.remove('flash-gray'), 500);
-                } else {
-                    headsCount++;
-                    document.getElementById('coin-counter').innerText = "O: " + headsCount;
-                    document.body.classList.add('flash-gold');
-                    setTimeout(() => document.body.classList.remove('flash-gold'), 500);
-                }
+                const res = Math.random() > 0.5 ? "O" : "X";
+                btn.classList.remove('coin-animation'); btn.innerText = res;
+                if (res === "X") btn.classList.add('tails');
+                else { headsCount++; document.getElementById('coin-counter').innerText = "O: " + headsCount; }
                 isFlipping = false;
             }, 450);
         }
 
-        function resetCoinCount() {
-            headsCount = 0;
-            document.getElementById('coin-counter').textContent = "O: 0";
-        }
+        function resetCoinCount() { headsCount = 0; document.getElementById('coin-counter').textContent = "O: 0"; }
 
-        function resetGame() {
-            if (!confirm('重置遊戲？')) return;
-            location.reload();
-        }
+        function resetGame() { if (confirm('重置遊戲？')) location.reload(); }
     </script>
 </body>
 </html>
