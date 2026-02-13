@@ -29,12 +29,26 @@
             position: relative; width: 100%;
         }
         
-        /* 讓 + 數字 - 三者成為一個固定的群組，不受螢幕寬度影響 */
         .hp-box { 
             display: flex; align-items: center; justify-content: center; 
-            gap: 15px; /* 控制按鈕與數字的間距 */
+            gap: 15px; 
             z-index: 5;
         }
+
+        /* 修改點：戰鬥區按鈕樣式 */
+        .hp-box button {
+            width: 50px; height: 50px; 
+            border-radius: 50%; border: none; 
+            background: white; color: #333; 
+            font-size: 2rem; font-weight: bold; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; 
+            padding: 0; line-height: 1;
+            transition: transform 0.1s;
+            touch-action: manipulation;
+        }
+        .hp-box button:active { transform: scale(0.9); }
         
         .hp-input { 
             font-size: 3.5rem; font-weight: bold; width: 130px; text-align: center; 
@@ -48,7 +62,6 @@
             text-shadow: 0 0 15px rgba(46, 204, 113, 1) !important;
         }
 
-        /* 側邊資訊標籤：使用百分比或固定邊距，避免寬螢幕偏移 */
         .gx-marker { 
             position: absolute; left: 20px; top: 50%; transform: translateY(-50%); 
             background: linear-gradient(135deg, #0984e3, #74b9ff); color: white; 
@@ -71,7 +84,6 @@
         }
         .boost-input.active { border-color: var(--boost-color); background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 10px var(--boost-color); color: var(--boost-color); }
 
-        /* 備戰區優化 */
         .bench-container { 
             display: grid; grid-template-columns: repeat(5, 1fr); 
             gap: 8px; padding: 8px; background: rgba(0,0,0,0.2); 
@@ -85,11 +97,11 @@
         .switch-label { width: 90%; text-align: center; font-size: 0.7rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 5px 0; border-radius: 6px; cursor: pointer; margin-bottom: 8px; }
         .bench-hp-input { font-size: 1.4rem; font-weight: bold; width: 100%; text-align: center; color: white; background: transparent; border: none; outline: none; }
 
-        button { width: 45px; height: 45px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.5rem; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.3); touch-action: manipulation; }
+        /* 備戰區的小按鈕樣式保持原樣或稍微調整 */
+        .bench-slot button { width: 40px; height: 40px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.3rem; font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.3); touch-action: manipulation; }
         .bench-controls { display: flex; width: 90%; gap: 4px; }
         .bench-btn { flex: 1; height: 35px; border-radius: 6px; font-size: 1.2rem; }
         
-        /* 中央硬幣與重置鈕 */
         .center-controls { 
             position: fixed; left: 0; top: 50%; width: 100%; transform: translateY(-50%); 
             pointer-events: none; z-index: 1000; display: flex; justify-content: space-between; align-items: center; 
@@ -188,7 +200,7 @@
             let html = '';
             for(let i=1; i<=5; i++) {
                 const id = `${prefix}-b${i}`;
-                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)"><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${id}', -10)">-</button><button class="bench-btn" onclick="changeHP('${id}', 10)">+</button></div></div>`;
+                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)"><div class="bench-controls"><button onclick="changeHP('${id}', -10)">-</button><button onclick="changeHP('${id}', 10)">+</button></div></div>`;
             }
             container.innerHTML = html;
         }
@@ -261,20 +273,16 @@
             if (isFlipping) return;
             isFlipping = true;
             const btn = document.getElementById('coin-btn');
-            btn.classList.remove('tails', 'coin-animation');
-            void btn.offsetWidth; btn.classList.add('coin-animation');
-            btn.innerText = "";
+            btn.classList.add('coin-animation'); btn.innerText = "";
             setTimeout(() => {
                 const res = Math.random() > 0.5 ? "O" : "X";
                 btn.classList.remove('coin-animation'); btn.innerText = res;
-                if (res === "X") btn.classList.add('tails');
-                else { headsCount++; document.getElementById('coin-counter').innerText = "O: " + headsCount; }
+                if (res === "O") { headsCount++; document.getElementById('coin-counter').innerText = "O: " + headsCount; }
                 isFlipping = false;
             }, 450);
         }
 
         function resetCoinCount() { headsCount = 0; document.getElementById('coin-counter').textContent = "O: 0"; }
-
         function resetGame() { if (confirm('重置遊戲？')) location.reload(); }
     </script>
 </body>
