@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PTCG Pro - Smart Boost Pro</title>
+    <title>PTCG Pro - High Contrast Mode</title>
     <style>
-        :root { --bg: #f0f4f8; --opp-bg: #ff6b6b; --me-bg: #48dbfb; --accent: #feca57; --boost-color: #2ed573; }
+        :root { 
+            --bg: #f0f4f8; 
+            --opp-bg: #ff6b6b; /* 對手：紅 */
+            --me-bg: #2c3e50;  /* 我方：改為深灰藍，增加對比度 */
+            --accent: #feca57; 
+            --boost-color: #2ed573; /* 強化字：綠 */
+        }
         body {
             font-family: sans-serif; background-color: var(--bg); color: white;
             margin: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
@@ -21,15 +27,15 @@
         
         .hp-input { 
             font-size: 2.8rem; font-weight: bold; width: 110px; text-align: center; 
-            color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+            color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
             background: transparent; border: none; outline: none;
-            transition: all 0.3s ease;
         }
         .hp-input::-webkit-inner-spin-button, .hp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
+        /* 群體強化樣式：在深色背景下發光更明顯 */
         .hp-boosted {
             color: var(--boost-color) !important;
-            text-shadow: 0 0 15px rgba(46, 204, 113, 0.9) !important;
+            text-shadow: 0 0 15px rgba(46, 204, 113, 1) !important;
         }
 
         .group-boost-panel {
@@ -40,26 +46,21 @@
         .boost-label { font-size: 0.6rem; color: rgba(255,255,255,0.8); font-weight: bold; }
         
         .boost-input {
-            width: 45px; height: 35px; background: rgba(255,255,255,0.2); 
-            border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
+            width: 45px; height: 35px; background: rgba(255,255,255,0.15); 
+            border: 2px solid rgba(255,255,255,0.3); border-radius: 8px;
             text-align: center; font-weight: bold; font-size: 1.1rem; color: white;
             outline: none; transition: 0.3s;
         }
-        .boost-input.active {
-            border-color: var(--boost-color);
-            background: rgba(46, 204, 113, 0.2);
-            box-shadow: 0 0 10px var(--boost-color);
-            color: var(--boost-color);
-        }
+        .boost-input.active { border-color: var(--boost-color); background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 10px var(--boost-color); color: var(--boost-color); }
 
-        .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; background: rgba(0,0,0,0.1); border-radius: 10px; margin: 5px; }
-        .me .bench-container { background: rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.15); padding: 8px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
+        .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 10px; margin: 5px; }
+        .me .bench-container { margin-bottom: 30px; }
+        .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.1); padding: 8px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }
         
         .switch-label { width: 94%; text-align: center; font-size: 0.75rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 8px 0; border-radius: 4px; cursor: pointer; margin-bottom: 6px; color: white; }
         .bench-hp-input { font-size: 1.2rem; font-weight: bold; margin: 4px 0; width: 55px; text-align: center; color: white; background: transparent; border: none; outline: none; }
 
-        button { width: 35px; height: 35px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; font-weight: bold; touch-action: manipulation; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        button { width: 35px; height: 35px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; font-weight: bold; touch-action: manipulation; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .bench-controls { display: flex; width: 94%; gap: 4px; }
         .bench-btn { flex: 1; height: 32px; border-radius: 6px; font-size: 1rem; }
         
@@ -97,12 +98,12 @@
         <div class="main-battle" id="main-opp-container">
             <div class="group-boost-panel">
                 <span class="boost-label">BOOST ↑</span>
-                <input type="number" id="boost-opp" class="boost-input" value="0" step="10" oninput="updateBoost('opp')">
+                <input type="number" id="boost-opp" class="boost-input" value="0" step="10" onchange="updateBoost('opp')">
             </div>
             <div class="gx-marker" onclick="this.classList.toggle('used')">GX</div>
             <div class="hp-box">
                 <button onclick="changeHP('hp-opp', -10)">-</button>
-                <input type="number" class="hp-input" id="hp-opp" value="0" inputmode="numeric" onfocus="this.select()" onblur="handleHPBlur(this)" oninput="handleHPInput(this)">
+                <input type="number" class="hp-input" id="hp-opp" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)">
                 <button onclick="changeHP('hp-opp', 10)">+</button>
             </div>
             <div class="status-row">
@@ -126,12 +127,12 @@
         <div class="main-battle" id="main-me-container">
             <div class="group-boost-panel">
                 <span class="boost-label">BOOST ↑</span>
-                <input type="number" id="boost-me" class="boost-input" value="0" step="10" oninput="updateBoost('me')">
+                <input type="number" id="boost-me" class="boost-input" value="0" step="10" onchange="updateBoost('me')">
             </div>
             <div class="gx-marker" onclick="this.classList.toggle('used')">GX</div>
             <div class="hp-box">
                 <button onclick="changeHP('hp-me', -10)">-</button>
-                <input type="number" class="hp-input" id="hp-me" value="0" inputmode="numeric" onfocus="this.select()" onblur="handleHPBlur(this)" oninput="handleHPInput(this)">
+                <input type="number" class="hp-input" id="hp-me" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)">
                 <button onclick="changeHP('hp-me', 10)">+</button>
             </div>
             <div class="status-row">
@@ -154,7 +155,7 @@
             let html = '';
             for(let i=1; i<=5; i++) {
                 const id = `${prefix}-b${i}`;
-                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onblur="handleHPBlur(this)" oninput="handleHPInput(this)"><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${id}', -10)">-</button><button class="bench-btn" onclick="changeHP('${id}', 10)">+</button></div></div>`;
+                html += `<div class="bench-slot"><div class="switch-label" onclick="switchHP('${hpId}', '${id}')">Switch ${i}</div><input type="number" class="bench-hp-input" id="${id}" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)"><div class="bench-controls"><button class="bench-btn" onclick="changeHP('${id}', -10)">-</button><button class="bench-btn" onclick="changeHP('${id}', 10)">+</button></div></div>`;
             }
             container.innerHTML = html;
         }
@@ -177,16 +178,12 @@
             lastBoost[side] = val;
         }
 
-        // 核心優化：手動輸入後的加成邏輯
-        function handleHPBlur(el) {
+        function handleHPSmartChange(el) {
             const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
-            let currentHP = parseInt(el.value) || 0;
-
-            // 只有當 boost 開啟，且輸入了大於 0 的數值，且該數值尚未包含加成時
-            if (boostVal > 0 && currentHP > 0 && !el.dataset.hasBoost) {
-                el.value = currentHP + boostVal;
-                el.dataset.hasBoost = "true"; // 標記已加成
+            let val = parseInt(el.value) || 0;
+            if (boostVal > 0 && val > 0 && !el.classList.contains('hp-boosted')) {
+                el.value = val + boostVal;
             }
             handleHPInput(el);
         }
@@ -196,16 +193,8 @@
             const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
             let container = el.closest('.bench-slot') || (side === 'me' ? document.getElementById('main-me-container') : document.getElementById('main-opp-container'));
-            
             hp === 0 ? container.classList.add('fainted') : container.classList.remove('fainted');
-            
-            if (boostVal > 0 && hp > 0) {
-                el.classList.add('hp-boosted');
-                el.dataset.hasBoost = "true";
-            } else {
-                el.classList.remove('hp-boosted');
-                delete el.dataset.hasBoost;
-            }
+            (boostVal > 0 && hp >= boostVal && hp > 0) ? el.classList.add('hp-boosted') : el.classList.remove('hp-boosted');
         }
 
         function changeHP(id, amt) {
@@ -213,9 +202,8 @@
             let hp = parseInt(el.value) || 0;
             const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
-
             if (hp === 0 && amt > 0 && boostVal > 0) {
-                el.value = boostVal; // 從 0 開始跳加成值
+                el.value = boostVal; 
             } else {
                 el.value = Math.max(0, hp + amt);
             }
