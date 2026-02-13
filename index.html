@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PTCG Pro - Battle Area Fixed</title>
+    <title>PTCG Pro - Unified Design</title>
     <style>
         :root { 
             --bg: #f0f4f8; 
@@ -23,21 +23,20 @@
         .opponent { transform: rotate(180deg); background-color: var(--opp-bg); border-bottom: 2px solid white; }
         .me { background-color: var(--me-bg); color: white; }
 
-        /* 戰鬥區佈局優化：縮短按鈕間距 */
         .main-battle { 
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
             padding: 0 10px; position: relative; 
         }
+        
+        /* 戰鬥區容器 */
         .hp-box { 
             display: flex; align-items: center; justify-content: center; 
-            gap: 5px; /* 原本是 15px，縮小到 5px 讓按鈕更靠近 */
-            width: 100%; margin: 5px 0; 
+            gap: 15px; width: 100%; margin: 5px 0; 
         }
         
         .hp-input { 
             font-size: 3rem; font-weight: bold; 
-            width: 90px; /* 從 110px 縮小到 90px，進一步拉近按鈕距離 */
-            text-align: center; 
+            width: 100px; text-align: center; 
             color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
             background: transparent; border: none; outline: none;
         }
@@ -47,6 +46,31 @@
             color: var(--boost-color) !important;
             text-shadow: 0 0 15px rgba(46, 204, 113, 1) !important;
         }
+
+        /* 統一的按鈕物件樣式 (與異常狀態相同) */
+        .status-btn { 
+            width: 45px; height: 45px; 
+            border-radius: 50%; border: 2px solid white; 
+            background: transparent; /* 保持透明背景 */
+            color: white; font-size: 1.8rem; font-weight: bold;
+            cursor: pointer; opacity: 0.2; 
+            display: flex; align-items: center; justify-content: center; 
+            transition: 0.2s; padding: 0; line-height: 1;
+        }
+        
+        /* 戰鬥區的加減按鈕：預設不透明 */
+        .hp-box .status-btn { opacity: 1; background: rgba(255,255,255,0.1); }
+        .hp-box .status-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.3); }
+
+        .status-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px white; }
+        .status-btn svg { width: 26px; height: 26px; fill: white; }
+        
+        /* 異常狀態專屬背景色 */
+        .st-psn { background: #9b59b6 !important; } 
+        .st-brn { background: #e74c3c !important; } 
+        .st-par { background: #f1c40f !important; } 
+        .st-slp { background: #3498db !important; } 
+        .st-cnf { background: #e84393 !important; }
 
         .gx-marker { 
             position: absolute; left: 10px; top: 50%; transform: translateY(-50%); 
@@ -65,35 +89,21 @@
             width: 45px; height: 35px; background: rgba(255,255,255,0.1); 
             border: 2px solid rgba(255,255,255,0.3); border-radius: 8px;
             text-align: center; font-weight: bold; font-size: 1.1rem; color: white;
-            outline: none; transition: 0.3s;
+            outline: none;
         }
         .boost-input.active { border-color: var(--boost-color); background: rgba(46, 204, 113, 0.2); box-shadow: 0 0 10px var(--boost-color); color: var(--boost-color); }
 
-        .bench-container { 
-            display: grid; grid-template-columns: repeat(5, 1fr); 
-            gap: 4px; padding: 4px; background: rgba(0,0,0,0.2); 
-            border-radius: 10px; margin: 5px; 
-        }
-        .bench-slot { 
-            display: flex; flex-direction: column; align-items: center; 
-            background: rgba(255,255,255,0.08); padding: 5px 0; 
-            border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); 
-            min-width: 0;
-        }
-        .switch-label { 
-            width: 90%; text-align: center; font-size: 0.6rem; font-weight: bold; 
-            background: rgba(0,0,0,0.3); padding: 3px 0; border-radius: 4px; 
-            cursor: pointer; margin-bottom: 4px; overflow: hidden; white-space: nowrap;
-        }
+        .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 10px; margin: 5px; }
+        .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.08); padding: 5px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); min-width: 0; }
+        .switch-label { width: 90%; text-align: center; font-size: 0.6rem; font-weight: bold; background: rgba(0,0,0,0.3); padding: 3px 0; border-radius: 4px; cursor: pointer; margin-bottom: 4px; }
         .bench-hp-input { font-size: 1.1rem; font-weight: bold; width: 100%; text-align: center; color: white; background: transparent; border: none; outline: none; }
 
-        button { width: 36px; height: 36px; border-radius: 50%; border: none; background: white; color: #333; font-size: 1.2rem; font-weight: bold; box-shadow: 0 3px 6px rgba(0,0,0,0.3); touch-action: manipulation; }
+        /* 備戰區小按鈕 */
         .bench-controls { display: flex; width: 95%; gap: 2px; }
-        .bench-btn { flex: 1; height: 28px; border-radius: 4px; font-size: 0.9rem; }
+        .bench-btn { flex: 1; height: 28px; border-radius: 4px; border: 1px solid white; background: transparent; color: white; font-size: 0.9rem; font-weight: bold; }
         
         .center-controls { position: fixed; left: 0; top: 50%; width: 100%; transform: translateY(-50%); pointer-events: none; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 5px; box-sizing: border-box; }
         .side-group { display: flex; flex-direction: column; gap: 10px; pointer-events: auto; }
-        
         .side-btn { background: #444; border: 1px solid #777; padding: 8px 4px; border-radius: 6px; font-size: 0.65rem; color: white; width: 50px; text-align: center; cursor: pointer; }
         .reset { background: #e74c3c; }
         
@@ -111,11 +121,6 @@
         @keyframes toss { 0%, 100% { margin-top: 0; } 50% { margin-top: -80px; scale: 1.2; } }
 
         .status-row { display: flex; gap: 8px; margin-top: 5px; }
-        .status-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; opacity: 0.2; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .status-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px white; }
-        .status-btn svg { width: 24px; height: 24px; fill: white; }
-        .st-psn { background: #9b59b6; } .st-brn { background: #e74c3c; } .st-par { background: #f1c40f; } .st-slp { background: #3498db; } .st-cnf { background: #e84393; }
-
         .fainted { opacity: 0.3; filter: grayscale(100%); transition: 0.3s; }
     </style>
 </head>
@@ -129,9 +134,9 @@
                 <input type="number" id="boost-opp" class="boost-input" value="0" step="10" onchange="updateBoost('opp')">
             </div>
             <div class="hp-box">
-                <button onclick="changeHP('hp-opp', -10)">-</button>
+                <button class="status-btn" onclick="changeHP('hp-opp', -10)">-</button>
                 <input type="number" class="hp-input" id="hp-opp" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)">
-                <button onclick="changeHP('hp-opp', 10)">+</button>
+                <button class="status-btn" onclick="changeHP('hp-opp', 10)">+</button>
             </div>
             <div class="status-row">
                 <div class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
@@ -162,9 +167,9 @@
                 <input type="number" id="boost-me" class="boost-input" value="0" step="10" onchange="updateBoost('me')">
             </div>
             <div class="hp-box">
-                <button onclick="changeHP('hp-me', -10)">-</button>
+                <button class="status-btn" onclick="changeHP('hp-me', -10)">-</button>
                 <input type="number" class="hp-input" id="hp-me" value="0" inputmode="numeric" onfocus="this.select()" onchange="handleHPSmartChange(this)" oninput="handleHPInput(this)">
-                <button onclick="changeHP('hp-me', 10)">+</button>
+                <button class="status-btn" onclick="changeHP('hp-me', 10)">+</button>
             </div>
             <div class="status-row">
                 <div class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
@@ -259,20 +264,16 @@
             if (isFlipping) return;
             isFlipping = true;
             const btn = document.getElementById('coin-btn');
-            btn.classList.remove('tails', 'coin-animation');
-            void btn.offsetWidth; btn.classList.add('coin-animation');
-            btn.innerText = "";
+            btn.classList.add('coin-animation'); btn.innerText = "";
             setTimeout(() => {
                 const res = Math.random() > 0.5 ? "O" : "X";
                 btn.classList.remove('coin-animation'); btn.innerText = res;
-                if (res === "X") btn.classList.add('tails');
-                else { headsCount++; document.getElementById('coin-counter').innerText = "O: " + headsCount; }
+                if (res === "O") { headsCount++; document.getElementById('coin-counter').innerText = "O: " + headsCount; }
                 isFlipping = false;
             }, 450);
         }
 
         function resetCoinCount() { headsCount = 0; document.getElementById('coin-counter').textContent = "O: 0"; }
-
         function resetGame() { if (confirm('重置遊戲？')) location.reload(); }
     </script>
 </body>
