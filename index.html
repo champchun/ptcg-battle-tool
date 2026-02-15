@@ -3,123 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PTCG Pro - Eye-Friendly Version</title>
+    <title>PTCG Pro - Poké Ball Special FX</title>
     <style>
         :root { 
             --bg: #f0f4f8; 
-            /* 調整為更沉穩的底色 */
-            --opp-bg: #b35252;  /* 柔和磚紅 */
-            --me-bg: #3c4d5e;   /* 柔和深藍 */
+            --opp-bg: #b35252;
+            --me-bg: #3c4d5e;
             --accent: #feca57; 
-            
-            /* 關鍵修改：降低紅綠按鈕的飽和度 */
-            --boost-color: #6fb98f;  /* 鼠尾草綠 */
-            --heal-color: #78a98d;   /* 柔和綠 */
-            --damage-color: #c96b6b; /* 煙燻紅 */
+            --boost-color: #6fb98f;
+            --heal-color: #78a98d;
+            --damage-color: #c96b6b;
+            --poke-red: #d34a4a;
+            --poke-white: #ffffff;
+            --poke-dark: #333333;
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg); color: white;
-            margin: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
-            background-image: radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
+
+        /* --- 基礎樣式 (保留) --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; background-image: radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .player-section { flex: 1; display: flex; flex-direction: column; position: relative; width: 100%; }
         .opponent { transform: rotate(180deg); background-color: var(--opp-bg); border-bottom: 2px solid rgba(255,255,255,0.3); }
         .me { background-color: var(--me-bg); color: white; }
-
-        .main-battle { 
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            /* 增加左右 Padding，防止中央 UI 與兩側 GX/Boost 擋到 */
-            padding: 0 65px; position: relative; 
-        }
-        
+        .main-battle { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 65px; position: relative; }
         .hp-box { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 5px 0; }
-        
-        .hp-input { 
-            font-size: 3rem; font-weight: bold; width: 110px; text-align: center; 
-            color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            background: transparent; border: none; outline: none;
-            transition: transform 0.2s;
-        }
+        .hp-input { font-size: 3rem; font-weight: bold; width: 110px; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); background: transparent; border: none; outline: none; transition: transform 0.2s; }
         .hp-input::-webkit-inner-spin-button, .hp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
         @keyframes hp-damage-anim { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #ff8e8e; } 100% { transform: scale(1); } }
         @keyframes hp-heal-anim { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #a2ffd0; } 100% { transform: scale(1); } }
         .hp-damage { animation: hp-damage-anim 0.3s ease-out; }
         .hp-heal { animation: hp-heal-anim 0.3s ease-out; }
-
-        .hp-boosted {
-            color: #d1ffde !important; /* 降低發光刺眼感 */
-            text-shadow: 0 0 10px rgba(46, 204, 113, 0.6) !important;
-        }
-
-        .status-btn { 
-            width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.6); 
-            cursor: pointer; opacity: 0.25; transition: 0.2s; display: flex; align-items: center; justify-content: center; 
-            padding: 0;
-        }
+        .hp-boosted { color: #d1ffde !important; text-shadow: 0 0 10px rgba(46, 204, 113, 0.6) !important; }
+        .status-btn { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.6); cursor: pointer; opacity: 0.25; transition: 0.2s; display: flex; align-items: center; justify-content: center; padding: 0; }
         .status-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3); border-color: white; }
         .status-btn svg { width: 24px; height: 24px; fill: white; }
-
-        /* 修改按鈕邊框，增加立體感與間隔 */
         .hp-btn { opacity: 1 !important; box-shadow: 0 3px 6px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.8) !important; }
         .hp-btn:active { transform: scale(0.92); opacity: 0.8; }
         .hp-btn-minus { background-color: var(--damage-color); }
         .hp-btn-plus { background-color: var(--heal-color); }
-
         .st-psn { background: #8e44ad; } .st-brn { background: #d35400; } .st-par { background: #f39c12; } .st-slp { background: #2980b9; } .st-cnf { background: #c0392b; }
-
-        /* 修正擋到的問題：讓 GX 與 Boost 更靠邊緣一點 */
-        .gx-marker { 
-            position: absolute; left: 8px; top: 50%; transform: translateY(-50%); 
-            background: linear-gradient(135deg, #2980b9, #3498db); color: white; 
-            font-weight: 900; font-size: 0.75rem; padding: 10px 5px; border-radius: 4px; 
-            border: 1.5px solid white; z-index: 10; writing-mode: vertical-lr; text-align: center;
-        }
+        .gx-marker { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #2980b9, #3498db); color: white; font-weight: 900; font-size: 0.75rem; padding: 10px 5px; border-radius: 4px; border: 1.5px solid white; z-index: 10; writing-mode: vertical-lr; text-align: center; }
         .gx-marker.used { background: #555; color: #aaa; border-color: #777; opacity: 0.6; }
-
-        .group-boost-panel {
-            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 100;
-        }
+        .group-boost-panel { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 100; }
         .boost-label { font-size: 0.5rem; color: rgba(255,255,255,0.6); font-weight: bold; }
-        .boost-input {
-            width: 42px; height: 32px; background: rgba(0,0,0,0.2); 
-            border: 1.5px solid rgba(255,255,255,0.3); border-radius: 6px;
-            text-align: center; font-weight: bold; font-size: 1rem; color: white;
-            outline: none;
-        }
+        .boost-input { width: 42px; height: 32px; background: rgba(0,0,0,0.2); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 6px; text-align: center; font-weight: bold; font-size: 1rem; color: white; outline: none; }
         .boost-input.active { border-color: var(--boost-color); background: rgba(111, 185, 143, 0.2); }
-
         .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 4px; background: rgba(0,0,0,0.15); border-radius: 10px; margin: 4px; }
         .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.05); padding: 5px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-width: 0; }
         .switch-label { width: 90%; text-align: center; font-size: 0.6rem; font-weight: bold; background: rgba(0,0,0,0.2); padding: 3px 0; border-radius: 4px; cursor: pointer; margin-bottom: 5px; color: rgba(255,255,255,0.8); }
         .bench-hp-input { font-size: 1.1rem; font-weight: bold; width: 100%; text-align: center; color: white; background: transparent; border: none; outline: none; }
-
         .bench-controls { display: flex; width: 95%; gap: 3px; justify-content: center; }
         .bench-btn { width: 28px; height: 28px; border-width: 1.5px !important; } 
-        
         .center-controls { position: fixed; left: 0; top: 50%; width: 100%; transform: translateY(-50%); pointer-events: none; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; box-sizing: border-box; }
         .side-group { display: flex; flex-direction: column; gap: 8px; pointer-events: auto; }
         .side-btn { background: #333; border: 1px solid #555; padding: 6px 4px; border-radius: 4px; font-size: 0.65rem; color: #ddd; width: 45px; text-align: center; cursor: pointer; }
         .reset { background: #a54a4a; border-color: #c96b6b; }
-        
+        .status-row { display: flex; gap: 6px; margin-top: 5px; }
+        .fainted { opacity: 0.35; filter: grayscale(80%); transition: 0.3s; }
+
+        /* --- 硬幣特效相關樣式 --- */
         .coin-btn {
             pointer-events: auto;
-            background: radial-gradient(circle, white 18%, #333 19%, #333 22%, transparent 23%),
-                        linear-gradient(180deg, #d34a4a 46%, #333 46%, #333 54%, #ffffff 54%);
-            border: 3px solid #222; width: 56px; height: 56px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; box-shadow: 0 4px 8px rgba(0,0,0,0.4); color: white; text-shadow: 0 1px 3px black;
+            width: 56px; height: 56px; border-radius: 50%; 
+            border: 3px solid var(--poke-dark);
             position: absolute; left: 50%; transform: translateX(-50%);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 2000;
         }
+
+        .coin-heads {
+            background: radial-gradient(circle, #fff 18%, var(--poke-dark) 19%, var(--poke-dark) 22%, transparent 23%),
+                        linear-gradient(180deg, var(--poke-red) 46%, var(--poke-dark) 46%, var(--poke-dark) 54%, var(--poke-white) 54%);
+        }
+
+        .coin-tails {
+            background: linear-gradient(180deg, var(--poke-red) 46%, var(--poke-dark) 46%, var(--poke-dark) 54%, var(--poke-white) 54%);
+        }
+
+        /* 特效 1: 正面成功脈衝 */
+        .fx-success::after {
+            content: ""; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
+            border-radius: 50%; border: 4px solid var(--accent);
+            animation: pulse-ring 0.6s ease-out forwards;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        /* 特效 2: 反面失敗震動 */
+        .fx-fail { animation: shake-fail 0.4s ease-in-out; }
+        @keyframes shake-fail {
+            0%, 100% { transform: translateX(-50%) rotate(0deg); }
+            20% { transform: translateX(-60%) rotate(-10deg); }
+            40% { transform: translateX(-40%) rotate(10deg); }
+            60% { transform: translateX(-55%) rotate(-5deg); }
+            80% { transform: translateX(-45%) rotate(5deg); }
+        }
+
+        .counter-icon {
+            display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #333;
+            background: radial-gradient(circle, #fff 18%, #333 19%, #333 22%, transparent 23%),
+                        linear-gradient(180deg, var(--poke-red) 46%, #333 46%, #333 54%, #fff 54%);
+            vertical-align: middle; margin-right: 4px;
+        }
+
         .coin-animation { animation: flip 0.15s infinite, toss 0.45s; }
         @keyframes flip { 0%, 100% { transform: translateX(-50%) scaleY(1); } 50% { transform: translateX(-50%) scaleY(0); } }
         @keyframes toss { 0%, 100% { margin-top: 0; } 50% { margin-top: -60px; scale: 1.15; } }
-
-        .status-row { display: flex; gap: 6px; margin-top: 5px; }
-        .fainted { opacity: 0.35; filter: grayscale(80%); transition: 0.3s; }
     </style>
 </head>
 <body>
@@ -149,9 +139,9 @@
 
     <div class="center-controls">
         <div class="side-group">
-            <div id="coin-counter" class="side-btn" style="background: var(--accent); color: #333; font-weight: bold; border:none;" onclick="resetCoinCount()">O: 0</div>
+            <div id="coin-counter" class="side-btn" style="background: var(--accent); color: #333; font-weight: bold; border:none;" onclick="resetCoinCount()"><span class="counter-icon"></span>0</div>
         </div>
-        <div id="coin-btn" class="coin-btn" onclick="flipCoin()">Flip</div>
+        <div id="coin-btn" class="coin-btn coin-heads" onclick="flipCoin()"></div>
         <div class="side-group">
             <div class="side-btn reset" onclick="resetGame()">RESET</div>
         </div>
@@ -181,7 +171,7 @@
     </div>
 
     <script>
-        // 保持所有原本的邏輯不變
+        // 核心邏輯保持一致
         let headsCount = 0, isFlipping = false;
         let lastBoost = { me: 0, opp: 0 };
 
@@ -205,10 +195,7 @@
             const selector = side === 'me' ? '.me .hp-input, .me .bench-hp-input' : '.opponent .hp-input, .opponent .bench-hp-input';
             document.querySelectorAll(selector).forEach(hpEl => {
                 let cur = parseInt(hpEl.value) || 0;
-                if (cur > 0 || diff < 0) {
-                    hpEl.value = Math.max(0, cur + diff);
-                    handleHPInput(hpEl, diff);
-                }
+                if (cur > 0 || diff < 0) { hpEl.value = Math.max(0, cur + diff); handleHPInput(hpEl, diff); }
             });
             lastBoost[side] = val;
         }
@@ -217,9 +204,7 @@
             const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
             let val = parseInt(el.value) || 0;
-            if (boostVal > 0 && val > 0 && !el.classList.contains('hp-boosted')) {
-                el.value = val + boostVal;
-            }
+            if (boostVal > 0 && val > 0 && !el.classList.contains('hp-boosted')) { el.value = val + boostVal; }
             handleHPInput(el, 0);
         }
 
@@ -228,13 +213,7 @@
             const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
             let container = el.closest('.bench-slot') || (side === 'me' ? document.getElementById('main-me-container') : document.getElementById('main-opp-container'));
-            
-            if (changeAmount !== 0) {
-                el.classList.remove('hp-damage', 'hp-heal');
-                void el.offsetWidth;
-                el.classList.add(changeAmount > 0 ? 'hp-heal' : 'hp-damage');
-            }
-
+            if (changeAmount !== 0) { el.classList.remove('hp-damage', 'hp-heal'); void el.offsetWidth; el.classList.add(changeAmount > 0 ? 'hp-heal' : 'hp-damage'); }
             hp === 0 ? container.classList.add('fainted') : container.classList.remove('fainted');
             (boostVal > 0 && hp >= boostVal && hp > 0) ? el.classList.add('hp-boosted') : el.classList.remove('hp-boosted');
         }
@@ -244,12 +223,7 @@
             let hp = parseInt(el.value) || 0;
             const side = el.closest('.player-section').classList.contains('me') ? 'me' : 'opp';
             const boostVal = parseInt(document.getElementById(`boost-${side}`).value) || 0;
-            
-            if (hp === 0 && amt > 0 && boostVal > 0) {
-                el.value = boostVal; 
-            } else {
-                el.value = Math.max(0, hp + amt);
-            }
+            if (hp === 0 && amt > 0 && boostVal > 0) { el.value = boostVal; } else { el.value = Math.max(0, hp + amt); }
             handleHPInput(el, amt);
         }
 
@@ -261,26 +235,48 @@
 
         function toggleStatus(btn) {
             const isEx = ['st-par', 'st-slp', 'st-cnf'].some(c => btn.classList.contains(c));
-            if (isEx && !btn.classList.contains('active')) {
-                btn.parentElement.querySelectorAll('.st-par, .st-slp, .st-cnf').forEach(el => el.classList.remove('active'));
-            }
+            if (isEx && !btn.classList.contains('active')) { btn.parentElement.querySelectorAll('.st-par, .st-slp, .st-cnf').forEach(el => el.classList.remove('active')); }
             btn.classList.toggle('active');
         }
 
+        // 修改擲硬幣邏輯：增加正反面特效
         function flipCoin() {
             if (isFlipping) return;
             isFlipping = true;
             const btn = document.getElementById('coin-btn');
-            btn.classList.add('coin-animation'); btn.innerText = "";
+            
+            // 清除之前的特效
+            btn.classList.remove('fx-success', 'fx-fail', 'coin-heads', 'coin-tails');
+            void btn.offsetWidth; // 強制重繪
+
+            btn.classList.add('coin-animation');
+            
             setTimeout(() => {
-                const res = Math.random() > 0.5 ? "O" : "X";
-                btn.classList.remove('coin-animation'); btn.innerText = res;
-                if (res === "O") { headsCount++; document.getElementById('coin-counter').innerText = "O: " + headsCount; }
+                const isHeads = Math.random() > 0.5;
+                btn.classList.remove('coin-animation');
+                
+                if (isHeads) {
+                    btn.classList.add('coin-heads', 'fx-success');
+                    headsCount++;
+                    document.getElementById('coin-counter').innerHTML = `<span class="counter-icon"></span>${headsCount}`;
+                } else {
+                    btn.classList.add('coin-tails', 'fx-fail');
+                }
+                
                 isFlipping = false;
+
+                // 600ms 後移除特效類別，以便下次觸發
+                setTimeout(() => {
+                    btn.classList.remove('fx-success', 'fx-fail');
+                }, 600);
+
             }, 450);
         }
 
-        function resetCoinCount() { headsCount = 0; document.getElementById('coin-counter').textContent = "O: 0"; }
+        function resetCoinCount() { 
+            headsCount = 0; 
+            document.getElementById('coin-counter').innerHTML = `<span class="counter-icon"></span>0`; 
+        }
         function resetGame() { if (confirm('重置遊戲？')) location.reload(); }
     </script>
 </body>
