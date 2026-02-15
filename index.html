@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PTCG Pro - Poké Ball Special FX</title>
+    <title>PTCG Pro - Poké Tracker</title>
     <style>
         :root { 
             --bg: #f0f4f8; 
@@ -16,100 +16,100 @@
             --poke-red: #d34a4a;
             --poke-white: #ffffff;
             --poke-dark: #333333;
+
+            /* Poké Ball Textures */
+            --bg-heads: radial-gradient(circle, #fff 18%, var(--poke-dark) 19%, var(--poke-dark) 22%, transparent 23%),
+                        linear-gradient(180deg, var(--poke-red) 46%, var(--poke-dark) 46%, var(--poke-dark) 54%, var(--poke-white) 54%);
+            --bg-tails: linear-gradient(180deg, var(--poke-red) 46%, var(--poke-dark) 46%, var(--poke-dark) 54%, var(--poke-white) 54%);
         }
 
-        /* --- 基礎樣式 (保留) --- */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; background-image: radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px); background-size: 20px 20px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg); color: white;
+            margin: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
+            background-image: radial-gradient(rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
         .player-section { flex: 1; display: flex; flex-direction: column; position: relative; width: 100%; }
         .opponent { transform: rotate(180deg); background-color: var(--opp-bg); border-bottom: 2px solid rgba(255,255,255,0.3); }
         .me { background-color: var(--me-bg); color: white; }
+
         .main-battle { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 65px; position: relative; }
         .hp-box { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 5px 0; }
-        .hp-input { font-size: 3rem; font-weight: bold; width: 110px; text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); background: transparent; border: none; outline: none; transition: transform 0.2s; }
+        
+        .hp-input { 
+            font-size: 3rem; font-weight: bold; width: 110px; text-align: center; 
+            color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: transparent; border: none; outline: none;
+            transition: transform 0.2s;
+        }
         .hp-input::-webkit-inner-spin-button, .hp-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
         @keyframes hp-damage-anim { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #ff8e8e; } 100% { transform: scale(1); } }
         @keyframes hp-heal-anim { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: #a2ffd0; } 100% { transform: scale(1); } }
         .hp-damage { animation: hp-damage-anim 0.3s ease-out; }
         .hp-heal { animation: hp-heal-anim 0.3s ease-out; }
         .hp-boosted { color: #d1ffde !important; text-shadow: 0 0 10px rgba(46, 204, 113, 0.6) !important; }
+
         .status-btn { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.6); cursor: pointer; opacity: 0.25; transition: 0.2s; display: flex; align-items: center; justify-content: center; padding: 0; }
         .status-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.3); border-color: white; }
         .status-btn svg { width: 24px; height: 24px; fill: white; }
+
         .hp-btn { opacity: 1 !important; box-shadow: 0 3px 6px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.8) !important; }
-        .hp-btn:active { transform: scale(0.92); opacity: 0.8; }
         .hp-btn-minus { background-color: var(--damage-color); }
         .hp-btn-plus { background-color: var(--heal-color); }
+
         .st-psn { background: #8e44ad; } .st-brn { background: #d35400; } .st-par { background: #f39c12; } .st-slp { background: #2980b9; } .st-cnf { background: #c0392b; }
-        .gx-marker { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #2980b9, #3498db); color: white; font-weight: 900; font-size: 0.75rem; padding: 10px 5px; border-radius: 4px; border: 1.5px solid white; z-index: 10; writing-mode: vertical-lr; text-align: center; }
+
+        .gx-marker { 
+            position: absolute; left: 8px; top: 50%; transform: translateY(-50%); 
+            background: linear-gradient(135deg, #2980b9, #3498db); color: white; 
+            font-weight: 900; font-size: 0.75rem; padding: 10px 5px; border-radius: 4px; 
+            border: 1.5px solid white; z-index: 10; writing-mode: vertical-lr; text-align: center;
+        }
         .gx-marker.used { background: #555; color: #aaa; border-color: #777; opacity: 0.6; }
+
         .group-boost-panel { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 100; }
         .boost-label { font-size: 0.5rem; color: rgba(255,255,255,0.6); font-weight: bold; }
         .boost-input { width: 42px; height: 32px; background: rgba(0,0,0,0.2); border: 1.5px solid rgba(255,255,255,0.3); border-radius: 6px; text-align: center; font-weight: bold; font-size: 1rem; color: white; outline: none; }
         .boost-input.active { border-color: var(--boost-color); background: rgba(111, 185, 143, 0.2); }
+
         .bench-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 4px; background: rgba(0,0,0,0.15); border-radius: 10px; margin: 4px; }
         .bench-slot { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.05); padding: 5px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-width: 0; }
         .switch-label { width: 90%; text-align: center; font-size: 0.6rem; font-weight: bold; background: rgba(0,0,0,0.2); padding: 3px 0; border-radius: 4px; cursor: pointer; margin-bottom: 5px; color: rgba(255,255,255,0.8); }
         .bench-hp-input { font-size: 1.1rem; font-weight: bold; width: 100%; text-align: center; color: white; background: transparent; border: none; outline: none; }
         .bench-controls { display: flex; width: 95%; gap: 3px; justify-content: center; }
         .bench-btn { width: 28px; height: 28px; border-width: 1.5px !important; } 
+
         .center-controls { position: fixed; left: 0; top: 50%; width: 100%; transform: translateY(-50%); pointer-events: none; z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; box-sizing: border-box; }
         .side-group { display: flex; flex-direction: column; gap: 8px; pointer-events: auto; }
-        .side-btn { background: #333; border: 1px solid #555; padding: 6px 4px; border-radius: 4px; font-size: 0.65rem; color: #ddd; width: 45px; text-align: center; cursor: pointer; }
+        .side-btn { background: #333; border: 1px solid #555; padding: 6px 4px; border-radius: 4px; font-size: 0.65rem; color: #ddd; width: 50px; text-align: center; cursor: pointer; }
         .reset { background: #a54a4a; border-color: #c96b6b; }
+        
+        /* Coin Mechanics */
+        .coin-btn {
+            pointer-events: auto; width: 56px; height: 56px; border-radius: 50%; 
+            border: 3px solid var(--poke-dark); position: absolute; left: 50%; transform: translateX(-50%);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4); cursor: pointer; z-index: 2000;
+            background: var(--bg-heads);
+        }
+        .coin-heads { background: var(--bg-heads) !important; }
+        .coin-tails { background: var(--bg-tails) !important; }
+
+        .fx-success::after { content: ""; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border-radius: 50%; border: 4px solid var(--accent); animation: pulse-ring 0.6s ease-out forwards; }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+        .fx-fail { animation: shake-fail 0.4s ease-in-out; }
+        @keyframes shake-fail { 0%, 100% { transform: translateX(-50%) rotate(0deg); } 20% { transform: translateX(-60%) rotate(-10deg); } 40% { transform: translateX(-40%) rotate(10deg); } 60% { transform: translateX(-55%) rotate(-5deg); } 80% { transform: translateX(-45%) rotate(5deg); } }
+
+        .coin-animation { animation: flip 0.22s infinite linear, toss 0.7s ease-out forwards, alternate-texture 0.22s steps(1) infinite; }
+        @keyframes flip { 0%, 100% { transform: translateX(-50%) scaleY(1); } 50% { transform: translateX(-50%) scaleY(0.05); } }
+        @keyframes alternate-texture { 0%, 49.9% { background: var(--bg-heads); } 50%, 100% { background: var(--bg-tails); } }
+        @keyframes toss { 0% { margin-top: 0; } 50% { margin-top: -70px; scale: 1.2; } 100% { margin-top: 0; } }
+
+        .counter-icon { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #333; background: var(--bg-heads); vertical-align: middle; margin-right: 4px; }
         .status-row { display: flex; gap: 6px; margin-top: 5px; }
         .fainted { opacity: 0.35; filter: grayscale(80%); transition: 0.3s; }
-
-        /* --- 硬幣特效相關樣式 --- */
-        .coin-btn {
-            pointer-events: auto;
-            width: 56px; height: 56px; border-radius: 50%; 
-            border: 3px solid var(--poke-dark);
-            position: absolute; left: 50%; transform: translateX(-50%);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            cursor: pointer;
-            z-index: 2000;
-        }
-
-        .coin-heads {
-            background: radial-gradient(circle, #fff 18%, var(--poke-dark) 19%, var(--poke-dark) 22%, transparent 23%),
-                        linear-gradient(180deg, var(--poke-red) 46%, var(--poke-dark) 46%, var(--poke-dark) 54%, var(--poke-white) 54%);
-        }
-
-        .coin-tails {
-            background: linear-gradient(180deg, var(--poke-red) 46%, var(--poke-dark) 46%, var(--poke-dark) 54%, var(--poke-white) 54%);
-        }
-
-        /* 特效 1: 正面成功脈衝 */
-        .fx-success::after {
-            content: ""; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
-            border-radius: 50%; border: 4px solid var(--accent);
-            animation: pulse-ring 0.6s ease-out forwards;
-        }
-        @keyframes pulse-ring {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.8); opacity: 0; }
-        }
-
-        /* 特效 2: 反面失敗震動 */
-        .fx-fail { animation: shake-fail 0.4s ease-in-out; }
-        @keyframes shake-fail {
-            0%, 100% { transform: translateX(-50%) rotate(0deg); }
-            20% { transform: translateX(-60%) rotate(-10deg); }
-            40% { transform: translateX(-40%) rotate(10deg); }
-            60% { transform: translateX(-55%) rotate(-5deg); }
-            80% { transform: translateX(-45%) rotate(5deg); }
-        }
-
-        .counter-icon {
-            display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #333;
-            background: radial-gradient(circle, #fff 18%, #333 19%, #333 22%, transparent 23%),
-                        linear-gradient(180deg, var(--poke-red) 46%, #333 46%, #333 54%, #fff 54%);
-            vertical-align: middle; margin-right: 4px;
-        }
-
-        .coin-animation { animation: flip 0.15s infinite, toss 0.45s; }
-        @keyframes flip { 0%, 100% { transform: translateX(-50%) scaleY(1); } 50% { transform: translateX(-50%) scaleY(0); } }
-        @keyframes toss { 0%, 100% { margin-top: 0; } 50% { margin-top: -60px; scale: 1.15; } }
     </style>
 </head>
 <body>
@@ -127,11 +127,11 @@
                 <button class="status-btn hp-btn hp-btn-plus" onclick="changeHP('hp-opp', 10)"></button>
             </div>
             <div class="status-row">
-                <div class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
-                <div class="status-btn st-brn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></div>
-                <div class="status-btn st-par" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
-                <div class="status-btn st-slp" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg></div>
-                <div class="status-btn st-cnf" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
+                <div title="Poison" class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
+                <div title="Burn" class="status-btn st-brn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></div>
+                <div title="Paralyzed" class="status-btn st-par" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
+                <div title="Asleep" class="status-btn st-slp" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg></div>
+                <div title="Confused" class="status-btn st-cnf" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
             </div>
         </div>
         <div class="bench-container" id="bench-opp"></div>
@@ -141,7 +141,7 @@
         <div class="side-group">
             <div id="coin-counter" class="side-btn" style="background: var(--accent); color: #333; font-weight: bold; border:none;" onclick="resetCoinCount()"><span class="counter-icon"></span>0</div>
         </div>
-        <div id="coin-btn" class="coin-btn coin-heads" onclick="flipCoin()"></div>
+        <div id="coin-btn" class="coin-btn" onclick="flipCoin()"></div>
         <div class="side-group">
             <div class="side-btn reset" onclick="resetGame()">RESET</div>
         </div>
@@ -160,18 +160,17 @@
                 <button class="status-btn hp-btn hp-btn-plus" onclick="changeHP('hp-me', 10)"></button>
             </div>
             <div class="status-row">
-                <div class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
-                <div class="status-btn st-brn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></div>
-                <div class="status-btn st-par" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
-                <div class="status-btn st-slp" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg></div>
-                <div class="status-btn st-cnf" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
+                <div title="Poison" class="status-btn st-psn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2c-5 0-9 4-9 9 0 3 2 6 5 7v2h8v-2c3-1 5-4 5-7 0-5-4-9-9-9zm-3 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg></div>
+                <div title="Burn" class="status-btn st-brn" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></div>
+                <div title="Paralyzed" class="status-btn st-par" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
+                <div title="Asleep" class="status-btn st-slp" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg></div>
+                <div title="Confused" class="status-btn st-cnf" onclick="toggleStatus(this)"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
             </div>
         </div>
         <div class="bench-container" id="bench-me"></div>
     </div>
 
     <script>
-        // 核心邏輯保持一致
         let headsCount = 0, isFlipping = false;
         let lastBoost = { me: 0, opp: 0 };
 
@@ -239,16 +238,12 @@
             btn.classList.toggle('active');
         }
 
-        // 修改擲硬幣邏輯：增加正反面特效
         function flipCoin() {
             if (isFlipping) return;
             isFlipping = true;
             const btn = document.getElementById('coin-btn');
-            
-            // 清除之前的特效
             btn.classList.remove('fx-success', 'fx-fail', 'coin-heads', 'coin-tails');
-            void btn.offsetWidth; // 強制重繪
-
+            void btn.offsetWidth;
             btn.classList.add('coin-animation');
             
             setTimeout(() => {
@@ -262,22 +257,16 @@
                 } else {
                     btn.classList.add('coin-tails', 'fx-fail');
                 }
-                
                 isFlipping = false;
-
-                // 600ms 後移除特效類別，以便下次觸發
-                setTimeout(() => {
-                    btn.classList.remove('fx-success', 'fx-fail');
-                }, 600);
-
-            }, 450);
+                setTimeout(() => { btn.classList.remove('fx-success', 'fx-fail'); }, 600);
+            }, 700);
         }
 
         function resetCoinCount() { 
             headsCount = 0; 
             document.getElementById('coin-counter').innerHTML = `<span class="counter-icon"></span>0`; 
         }
-        function resetGame() { if (confirm('重置遊戲？')) location.reload(); }
+        function resetGame() { if (confirm('Reset Game?')) location.reload(); }
     </script>
 </body>
 </html>
